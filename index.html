@@ -28,7 +28,7 @@
       --border: #2e3d5c;
     }
 
-    /* Themes */
+    /* 8 Custom Themes */
     body.theme-matrix {
       --bg-color: #020d04;
       --card-bg: #071a0b;
@@ -57,6 +57,46 @@
       --accent-hover: #0284c7;
       --accent-glow: rgba(56, 189, 248, 0.25);
       --border: #2d2d2d;
+    }
+
+    body.theme-gold {
+      --bg-color: #0f0c03;
+      --card-bg: #1a1607;
+      --card-inner: #29230c;
+      --accent: #eab308;
+      --accent-hover: #ca8a04;
+      --accent-glow: rgba(234, 179, 8, 0.25);
+      --border: #423812;
+    }
+
+    body.theme-synthwave {
+      --bg-color: #110519;
+      --card-bg: #1c0a2a;
+      --card-inner: #2b113f;
+      --accent: #d946ef;
+      --accent-hover: #c026d3;
+      --accent-glow: rgba(217, 70, 239, 0.25);
+      --border: #4a196b;
+    }
+
+    body.theme-crimson {
+      --bg-color: #0f0404;
+      --card-bg: #1c0808;
+      --card-inner: #2d1010;
+      --accent: #dc2626;
+      --accent-hover: #b91c1c;
+      --accent-glow: rgba(220, 38, 38, 0.25);
+      --border: #4a1616;
+    }
+
+    body.theme-nordic {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-inner: #334155;
+      --accent: #0ea5e9;
+      --accent-hover: #0284c7;
+      --accent-glow: rgba(14, 165, 233, 0.25);
+      --border: #475569;
     }
 
     * {
@@ -100,7 +140,6 @@
       text-shadow: 0 0 15px var(--accent-glow);
     }
 
-    /* Tabs */
     .tab-content {
       display: none;
     }
@@ -109,7 +148,6 @@
       display: block;
     }
 
-    /* Cards */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border);
@@ -128,7 +166,6 @@
       align-items: center;
     }
 
-    /* Inputs & Buttons */
     input, textarea, button, select {
       width: 100%;
       padding: 12px;
@@ -182,7 +219,6 @@
       background-color: rgba(239, 68, 68, 0.15);
     }
 
-    /* Quick Presets for Timer */
     .presets {
       display: flex;
       gap: 8px;
@@ -201,7 +237,6 @@
       border-color: var(--accent);
     }
 
-    /* Timer Controls */
     .timer-display {
       font-size: 3.8rem;
       font-weight: 900;
@@ -234,7 +269,6 @@
       display: block;
     }
 
-    /* Water Tracker Styling */
     .water-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -260,7 +294,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Horizontal Category/Split Selector */
     .category-menu {
       display: flex;
       gap: 8px;
@@ -294,7 +327,6 @@
       box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Bible Card Styling */
     .verse-card {
       text-align: center;
       padding: 30px 20px;
@@ -319,7 +351,6 @@
       margin-bottom: 24px;
     }
 
-    /* Checkbox & Lists */
     ul {
       list-style: none;
     }
@@ -376,7 +407,6 @@
       gap: 10px;
     }
 
-    /* Macro Bar */
     .macro-tracker {
       display: flex;
       justify-content: space-between;
@@ -399,7 +429,34 @@
       color: var(--text-muted);
     }
 
-    /* Calendar Journal Log */
+    .search-results-list {
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--card-inner);
+      display: none;
+    }
+
+    .search-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.15s ease;
+    }
+
+    .search-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-item:hover {
+      background-color: rgba(99, 102, 241, 0.15);
+    }
+
     .journal-entry {
       background-color: var(--card-inner);
       border: 1px solid var(--border);
@@ -437,7 +494,6 @@
       display: list-item;
     }
 
-    /* Bottom Nav */
     nav {
       position: fixed;
       bottom: 0;
@@ -484,9 +540,14 @@
         <option value="matrix">Matrix Green</option>
         <option value="sunset">Sunset Red</option>
         <option value="stealth">Stealth Blue</option>
+        <option value="gold">Gold Elite</option>
+        <option value="synthwave">Synthwave</option>
+        <option value="crimson">Crimson Red</option>
+        <option value="nordic">Nordic Frost</option>
       </select>
     </header>
 
+    <!-- 1. FOCUS TAB -->
     <section id="lockin" class="tab-content active">
       <div class="card">
         <h2>Focus Timer</h2>
@@ -534,6 +595,7 @@
       </div>
     </section>
 
+    <!-- 2. HABITS TAB -->
     <section id="habits" class="tab-content">
       <div class="card">
         <h2>Daily Habits & Streaks</h2>
@@ -549,6 +611,7 @@
       </div>
     </section>
 
+    <!-- 3. WORKOUT TAB -->
     <section id="workout" class="tab-content">
       <div class="category-menu" id="splits-menu"></div>
 
@@ -585,6 +648,7 @@
       </div>
     </section>
 
+    <!-- 4. DIET TAB WITH BASIC INGREDIENT SEARCH -->
     <section id="diet" class="tab-content">
       <div class="category-menu" id="meal-category-menu"></div>
 
@@ -609,9 +673,18 @@
           </div>
         </div>
 
-        <input type="text" id="food-input" placeholder="Food item (e.g. Chicken & Rice)">
         <div class="form-row">
-          <input type="number" id="calories-input" placeholder="Calories">
+          <input type="text" id="food-search-input" placeholder="Search foods (e.g. Egg, White Rice, Chicken Breast)">
+          <button id="search-btn" onclick="searchFoodOnline()" style="width: 130px; background-color: var(--card-inner); border: 1px solid var(--accent); color: var(--accent);">🔍 Search</button>
+        </div>
+
+        <div id="search-results" class="search-results-list"></div>
+
+        <div class="form-row">
+          <input type="text" id="food-input" placeholder="Selected Food Item">
+        </div>
+        <div class="form-row">
+          <input type="number" id="calories-input" placeholder="Calories (kcal)">
           <input type="number" id="protein-input" placeholder="Protein (g)">
         </div>
         <button onclick="addDietEntry()">Log Item to Category</button>
@@ -632,14 +705,27 @@
       </div>
     </section>
 
+    <!-- 5. BIBLE TAB WITH PRAYER & REFLECTION JOURNAL -->
     <section id="bible" class="tab-content">
       <div class="card verse-card">
         <div class="verse-text" id="verse-text">"I can do all things through Christ who strengthens me."</div>
         <div class="verse-ref" id="verse-ref">Philippians 4:13</div>
         <button onclick="getRandomVerse()" style="margin-bottom:0;">Randomize Verse</button>
       </div>
+
+      <div class="card">
+        <h2>Verse Reflection & Prayer Journal</h2>
+        <textarea id="bible-journal-input" rows="3" placeholder="Write down takeaways, reflection, or a prayer request..."></textarea>
+        <button onclick="saveBibleReflection()">Save Journal Entry</button>
+      </div>
+
+      <div class="card">
+        <h2>Saved Reflections</h2>
+        <div id="bible-journal-list"></div>
+      </div>
     </section>
 
+    <!-- 6. NOTES TAB -->
     <section id="notes" class="tab-content">
       <div class="card">
         <h2>Notes & Folders</h2>
@@ -683,19 +769,16 @@
   </nav>
 
   <script>
-    // --- PERSISTENT APP STATE ---
     let currentTheme = localStorage.getItem('appTheme') || 'cyberpunk';
     let waterGlasses = JSON.parse(localStorage.getItem('waterGlasses')) || 0;
     let focusTasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
     
-    // Habits State
     let habitsData = JSON.parse(localStorage.getItem('habitsData')) || [
       { id: 1, name: "Cold Shower", completedToday: false, streak: 3 },
       { id: 2, name: "Read 15 Mins", completedToday: false, streak: 5 },
       { id: 3, name: "Stretching Routine", completedToday: false, streak: 2 }
     ];
 
-    // Workout State
     const weeklySplits = ['Friday (Push)', 'Saturday (Pull)', 'Sunday (Legs)', 'Monday (Rest)', 'Tuesday (Upper)', 'Wednesday (Lower)', 'Thursday (Rest)'];
     let selectedSplit = localStorage.getItem('selectedSplit') || 'Friday (Push)';
     let workoutsData = JSON.parse(localStorage.getItem('workoutsData')) || {
@@ -705,7 +788,6 @@
     let prData = JSON.parse(localStorage.getItem('prData')) || [];
     let workoutJournal = JSON.parse(localStorage.getItem('workoutJournal')) || [];
 
-    // Diet State
     let mealCategories = JSON.parse(localStorage.getItem('mealCategories')) || ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
     let selectedMealCategory = localStorage.getItem('selectedMealCategory') || 'Breakfast';
     let dietData = JSON.parse(localStorage.getItem('dietData')) || {
@@ -713,12 +795,28 @@
     };
     let dietJournal = JSON.parse(localStorage.getItem('dietJournal')) || [];
 
-    // Notes State
     let noteFolders = JSON.parse(localStorage.getItem('noteFolders')) || ['General', 'Fitness Goals', 'Ideas'];
     let selectedFolder = localStorage.getItem('selectedFolder') || 'General';
     let notesData = JSON.parse(localStorage.getItem('notesData')) || [];
 
-    // Bible Verses Collection
+    let bibleJournal = JSON.parse(localStorage.getItem('bibleJournal')) || [];
+
+    const fallbackFoodDatabase = [
+      { name: "Egg (Whole, Large)", cals: 72, protein: 6 },
+      { name: "Egg White", cals: 17, protein: 4 },
+      { name: "White Rice (Cooked, 1 cup)", cals: 205, protein: 4 },
+      { name: "Brown Rice (Cooked, 1 cup)", cals: 218, protein: 5 },
+      { name: "Chicken Breast (Cooked, 100g)", cals: 165, protein: 31 },
+      { name: "Ground Beef 80/20 (100g)", cals: 254, protein: 17 },
+      { name: "Oats (Rolled, 1/2 cup dry)", cals: 150, protein: 5 },
+      { name: "Banana (Medium)", cals: 105, protein: 1 },
+      { name: "Whole Milk (1 cup)", cals: 149, protein: 8 },
+      { name: "Greek Yogurt (Nonfat, 170g)", cals: 100, protein: 17 },
+      { name: "Salmon (Cooked, 100g)", cals: 206, protein: 22 },
+      { name: "Potato (Medium Baked)", cals: 161, protein: 4 },
+      { name: "Peanut Butter (2 tbsp)", cals: 188, protein: 8 }
+    ];
+
     const bibleVerses = [
       { text: "I can do all things through Christ who strengthens me.", ref: "Philippians 4:13" },
       { text: "For God has not given us a spirit of fear, but of power and of love and of a sound mind.", ref: "2 Timothy 1:7" },
@@ -732,7 +830,6 @@
       { text: "No discipline seems pleasant at the time, but painful. Later on, however, it produces a harvest of righteousness and peace for those who have been trained by it.", ref: "Hebrews 12:11" }
     ];
 
-    // --- THEME ENGINE ---
     function changeTheme(theme) {
       currentTheme = theme;
       localStorage.setItem('appTheme', theme);
@@ -740,7 +837,6 @@
       document.getElementById('theme-select').value = theme;
     }
 
-    // --- NAVIGATION ---
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -751,10 +847,10 @@
       if (tabId === 'habits') renderHabits();
       if (tabId === 'workout') renderSplits();
       if (tabId === 'diet') renderMealCategories();
+      if (tabId === 'bible') renderBibleJournal();
       if (tabId === 'notes') renderNoteFolders();
     }
 
-    // --- WATER TRACKER ---
     function renderWaterTracker() {
       const grid = document.getElementById('water-grid');
       grid.innerHTML = '';
@@ -774,7 +870,6 @@
       renderWaterTracker();
     }
 
-    // --- HABITS TRACKER SYSTEM ---
     function addHabit() {
       const input = document.getElementById('habit-input');
       const name = input.value.trim();
@@ -830,7 +925,6 @@
       });
     }
 
-    // --- BIBLE VERSE SYSTEM ---
     function getRandomVerse() {
       const randomIndex = Math.floor(Math.random() * bibleVerses.length);
       const verse = bibleVerses[randomIndex];
@@ -838,7 +932,56 @@
       document.getElementById('verse-ref').innerText = verse.ref;
     }
 
-    // --- FOCUS TIMER & TASKS ---
+    function saveBibleReflection() {
+      const text = document.getElementById('bible-journal-input').value.trim();
+      if (!text) return;
+
+      const verseRef = document.getElementById('verse-ref').innerText;
+      const entry = {
+        id: Date.now(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        ref: verseRef,
+        text
+      };
+
+      bibleJournal.unshift(entry);
+      localStorage.setItem('bibleJournal', JSON.stringify(bibleJournal));
+      document.getElementById('bible-journal-input').value = '';
+      renderBibleJournal();
+    }
+
+    function deleteBibleReflection(id) {
+      bibleJournal = bibleJournal.filter(item => item.id !== id);
+      localStorage.setItem('bibleJournal', JSON.stringify(bibleJournal));
+      renderBibleJournal();
+    }
+
+    function renderBibleJournal() {
+      const list = document.getElementById('bible-journal-list');
+      list.innerHTML = '';
+
+      if (bibleJournal.length === 0) {
+        list.innerHTML = `<p style="color: var(--text-muted); text-align: center; font-size: 0.9rem;">No verse reflections saved yet.</p>`;
+        return;
+      }
+
+      bibleJournal.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'journal-entry';
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div>
+              <div class="journal-date">${entry.date}</div>
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">${entry.ref}</div>
+            </div>
+            <button class="btn-delete" onclick="deleteBibleReflection(${entry.id})">✕</button>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--text); white-space: pre-wrap;">${entry.text}</p>
+        `;
+        list.appendChild(div);
+      });
+    }
+
     let timerInterval = null;
     let secondsLeft = 1500;
 
@@ -925,7 +1068,6 @@
       });
     }
 
-    // --- WORKOUT SPLITS & PR TRACKER ---
     function renderSplits() {
       const menu = document.getElementById('splits-menu');
       menu.innerHTML = '';
@@ -1014,7 +1156,6 @@
       });
     }
 
-    // PR Tracker Functions
     function addPR() {
       const lift = document.getElementById('pr-lift-input').value.trim();
       const weight = document.getElementById('pr-weight-input').value.trim();
@@ -1123,7 +1264,87 @@
       });
     }
 
-    // --- DIET CATEGORIES & NUTRITION JOURNAL SYSTEM ---
+    async function searchFoodOnline() {
+      const queryInput = document.getElementById('food-search-input');
+      const query = queryInput.value.trim().toLowerCase();
+      const btn = document.getElementById('search-btn');
+      const resultsContainer = document.getElementById('search-results');
+
+      if (!query) {
+        alert('Please type a food item into the search bar.');
+        return;
+      }
+
+      btn.innerText = 'Searching...';
+      btn.disabled = true;
+      resultsContainer.style.display = 'block';
+      resultsContainer.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted);">Searching basic foods...</div>';
+
+      let results = [];
+
+      const localMatches = fallbackFoodDatabase.filter(item => item.name.toLowerCase().includes(query));
+      localMatches.forEach(item => {
+        results.push({ name: item.name, cals: item.cals, protein: item.protein });
+      });
+
+      try {
+        const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=15`;
+        const response = await fetch(searchUrl);
+        const data = await response.json();
+
+        if (data.products && data.products.length > 0) {
+          const filtered = data.products.filter(product => {
+            const name = (product.product_name || '').toLowerCase();
+            return !name.includes('recipe') && !name.includes('seasoning') && !name.includes('mix') && !name.includes('kit') && !name.includes('sauce');
+          });
+
+          filtered.forEach(product => {
+            const name = product.product_name || 'Food Item';
+            const nutriments = product.nutriments || {};
+            const cals = Math.round(nutriments['energy-kcal_100g'] || nutriments['energy-kcal'] || 0);
+            const protein = Math.round(nutriments['proteins_100g'] || nutriments['proteins'] || 0);
+
+            if (cals > 0 || protein > 0) {
+              results.push({ name: `${name} (per 100g)`, cals, protein });
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('API lookup failed, relying on local staples database');
+      }
+
+      resultsContainer.innerHTML = '';
+
+      if (results.length > 0) {
+        results.slice(0, 6).forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'search-item';
+          itemDiv.innerHTML = `
+            <div>
+              <strong style="font-size: 0.9rem;">${item.name}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${item.cals} kcal | ${item.protein}g protein</div>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--accent); font-weight: bold;">Select</span>
+          `;
+
+          itemDiv.onclick = () => selectSearchResult(item.name, item.cals, item.protein);
+          resultsContainer.appendChild(itemDiv);
+        });
+      } else {
+        resultsContainer.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted);">No raw items found. Type values manually below.</div>';
+      }
+
+      btn.innerText = '🔍 Search';
+      btn.disabled = false;
+    }
+
+    function selectSearchResult(name, calories, protein) {
+      document.getElementById('food-input').value = name;
+      document.getElementById('calories-input').value = calories;
+      document.getElementById('protein-input').value = protein;
+      document.getElementById('search-results').style.display = 'none';
+    }
+
     function renderMealCategories() {
       const menu = document.getElementById('meal-category-menu');
       menu.innerHTML = '';
@@ -1192,6 +1413,7 @@
       dietData[selectedMealCategory].push(entry);
       localStorage.setItem('dietData', JSON.stringify(dietData));
 
+      document.getElementById('food-search-input').value = '';
       document.getElementById('food-input').value = '';
       document.getElementById('calories-input').value = '';
       document.getElementById('protein-input').value = '';
@@ -1313,7 +1535,6 @@
       });
     }
 
-    // --- NOTES SYSTEM WITH FOLDERS ---
     function renderNoteFolders() {
       const menu = document.getElementById('notes-folder-menu');
       menu.innerHTML = '';
@@ -1399,13 +1620,13 @@
       });
     }
 
-    // --- INITIAL APP LOAD ---
     changeTheme(currentTheme);
     renderWaterTracker();
     renderTasks();
     renderHabits();
     renderSplits();
     renderMealCategories();
+    renderBibleJournal();
     renderNoteFolders();
   </script>
 </body>
