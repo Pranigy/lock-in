@@ -28,6 +28,37 @@
       --border: #2e3d5c;
     }
 
+    /* Themes */
+    body.theme-matrix {
+      --bg-color: #020d04;
+      --card-bg: #071a0b;
+      --card-inner: #0f2e15;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.25);
+      --border: #134e20;
+    }
+
+    body.theme-sunset {
+      --bg-color: #12080a;
+      --card-bg: #210d13;
+      --card-inner: #361720;
+      --accent: #f43f5e;
+      --accent-hover: #e11d48;
+      --accent-glow: rgba(244, 63, 94, 0.25);
+      --border: #52202f;
+    }
+
+    body.theme-stealth {
+      --bg-color: #050505;
+      --card-bg: #121212;
+      --card-inner: #1e1e1e;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --border: #2d2d2d;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -43,6 +74,7 @@
       justify-content: center;
       min-height: 100vh;
       padding-bottom: 90px;
+      transition: background-color 0.3s ease;
     }
 
     .app-container {
@@ -54,6 +86,9 @@
     header {
       margin-bottom: 16px;
       text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     header h1 {
@@ -197,6 +232,32 @@
       color: var(--text-muted);
       margin-bottom: 4px;
       display: block;
+    }
+
+    /* Water Tracker Styling */
+    .water-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .water-cup {
+      background-color: var(--card-inner);
+      border: 1px solid var(--border);
+      padding: 12px 0;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .water-cup.filled {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
     }
 
     /* Horizontal Category/Split Selector */
@@ -386,7 +447,7 @@
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-around;
-      padding: 12px 0;
+      padding: 10px 4px;
       max-width: 480px;
       margin: 0 auto;
       backdrop-filter: blur(10px);
@@ -397,14 +458,14 @@
       background: none;
       border: none;
       color: var(--text-muted);
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       width: auto;
       margin: 0;
-      padding: 4px;
+      padding: 2px 4px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
     }
 
     nav button.active {
@@ -418,6 +479,12 @@
   <div class="app-container">
     <header>
       <h1>Lock In</h1>
+      <select id="theme-select" onchange="changeTheme(this.value)" style="width: auto; margin: 0; padding: 6px 10px; font-size: 0.8rem;">
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="matrix">Matrix Green</option>
+        <option value="sunset">Sunset Red</option>
+        <option value="stealth">Stealth Blue</option>
+      </select>
     </header>
 
     <section id="lockin" class="tab-content active">
@@ -450,12 +517,35 @@
       </div>
 
       <div class="card">
+        <h2>
+          <span>Hydration Goal</span>
+          <span id="water-count" style="color: var(--accent); font-size: 0.9rem;">0 / 8 Cups</span>
+        </h2>
+        <div class="water-grid" id="water-grid"></div>
+      </div>
+
+      <div class="card">
         <h2>Session Goals / Tasks</h2>
         <div class="form-row">
           <input type="text" id="task-input" placeholder="What are you locking in on?">
           <button onclick="addTask()" style="width: 80px;">Add</button>
         </div>
         <ul id="tasks-list"></ul>
+      </div>
+    </section>
+
+    <section id="habits" class="tab-content">
+      <div class="card">
+        <h2>Daily Habits & Streaks</h2>
+        <div class="form-row">
+          <input type="text" id="habit-input" placeholder="New Habit (e.g. Read 10 pages, Cold Shower)">
+          <button onclick="addHabit()" style="width: 80px;">Add</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Active Routines</h2>
+        <ul id="habits-list"></ul>
       </div>
     </section>
 
@@ -477,6 +567,16 @@
         <h2>Planned Exercises</h2>
         <ul id="workout-list"></ul>
         <button onclick="logWorkoutSession()" style="background-color: var(--success); margin-top: 10px;">Save Workout to Calendar Log</button>
+      </div>
+
+      <div class="card">
+        <h2>Personal Records (PRs)</h2>
+        <div class="form-row">
+          <input type="text" id="pr-lift-input" placeholder="Lift (e.g. Squat)">
+          <input type="text" id="pr-weight-input" placeholder="Weight (e.g. 225 lbs)">
+        </div>
+        <button onclick="addPR()">Record PR</button>
+        <ul id="pr-list" style="margin-top: 10px;"></ul>
       </div>
 
       <div class="card">
@@ -565,6 +665,9 @@
     <button class="active" onclick="switchTab('lockin', this)">
       <span>Focus</span>
     </button>
+    <button onclick="switchTab('habits', this)">
+      <span>Habits</span>
+    </button>
     <button onclick="switchTab('workout', this)">
       <span>Workout</span>
     </button>
@@ -581,25 +684,28 @@
 
   <script>
     // --- PERSISTENT APP STATE ---
+    let currentTheme = localStorage.getItem('appTheme') || 'cyberpunk';
+    let waterGlasses = JSON.parse(localStorage.getItem('waterGlasses')) || 0;
     let focusTasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
     
-    // Fixed Weekly Workout Rotation
+    // Habits State
+    let habitsData = JSON.parse(localStorage.getItem('habitsData')) || [
+      { id: 1, name: "Cold Shower", completedToday: false, streak: 3 },
+      { id: 2, name: "Read 15 Mins", completedToday: false, streak: 5 },
+      { id: 3, name: "Stretching Routine", completedToday: false, streak: 2 }
+    ];
+
+    // Workout State
     const weeklySplits = ['Friday (Push)', 'Saturday (Pull)', 'Sunday (Legs)', 'Monday (Rest)', 'Tuesday (Upper)', 'Wednesday (Lower)', 'Thursday (Rest)'];
     let selectedSplit = localStorage.getItem('selectedSplit') || 'Friday (Push)';
     let workoutsData = JSON.parse(localStorage.getItem('workoutsData')) || {
-      'Friday (Push)': [],
-      'Saturday (Pull)': [],
-      'Sunday (Legs)': [],
-      'Monday (Rest)': [],
-      'Tuesday (Upper)': [],
-      'Wednesday (Lower)': [],
-      'Thursday (Rest)': []
+      'Friday (Push)': [], 'Saturday (Pull)': [], 'Sunday (Legs)': [],
+      'Monday (Rest)': [], 'Tuesday (Upper)': [], 'Wednesday (Lower)': [], 'Thursday (Rest)': []
     };
-
-    // Calendar / Journal State for Workouts
+    let prData = JSON.parse(localStorage.getItem('prData')) || [];
     let workoutJournal = JSON.parse(localStorage.getItem('workoutJournal')) || [];
 
-    // Diet Categories State
+    // Diet State
     let mealCategories = JSON.parse(localStorage.getItem('mealCategories')) || ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
     let selectedMealCategory = localStorage.getItem('selectedMealCategory') || 'Breakfast';
     let dietData = JSON.parse(localStorage.getItem('dietData')) || {
@@ -626,6 +732,14 @@
       { text: "No discipline seems pleasant at the time, but painful. Later on, however, it produces a harvest of righteousness and peace for those who have been trained by it.", ref: "Hebrews 12:11" }
     ];
 
+    // --- THEME ENGINE ---
+    function changeTheme(theme) {
+      currentTheme = theme;
+      localStorage.setItem('appTheme', theme);
+      document.body.className = theme === 'cyberpunk' ? '' : `theme-${theme}`;
+      document.getElementById('theme-select').value = theme;
+    }
+
     // --- NAVIGATION ---
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -634,9 +748,86 @@
       document.getElementById(tabId).classList.add('active');
       btn.classList.add('active');
       
+      if (tabId === 'habits') renderHabits();
       if (tabId === 'workout') renderSplits();
       if (tabId === 'diet') renderMealCategories();
       if (tabId === 'notes') renderNoteFolders();
+    }
+
+    // --- WATER TRACKER ---
+    function renderWaterTracker() {
+      const grid = document.getElementById('water-grid');
+      grid.innerHTML = '';
+      for (let i = 1; i <= 8; i++) {
+        const cup = document.createElement('div');
+        cup.className = `water-cup ${i <= waterGlasses ? 'filled' : ''}`;
+        cup.innerText = '💧';
+        cup.onclick = () => toggleWater(i);
+        grid.appendChild(cup);
+      }
+      document.getElementById('water-count').innerText = `${waterGlasses} / 8 Cups`;
+    }
+
+    function toggleWater(index) {
+      waterGlasses = waterGlasses === index ? index - 1 : index;
+      localStorage.setItem('waterGlasses', JSON.stringify(waterGlasses));
+      renderWaterTracker();
+    }
+
+    // --- HABITS TRACKER SYSTEM ---
+    function addHabit() {
+      const input = document.getElementById('habit-input');
+      const name = input.value.trim();
+      if (!name) return;
+
+      habitsData.push({ id: Date.now(), name, completedToday: false, streak: 0 });
+      localStorage.setItem('habitsData', JSON.stringify(habitsData));
+      input.value = '';
+      renderHabits();
+    }
+
+    function toggleHabit(id) {
+      habitsData = habitsData.map(h => {
+        if (h.id === id) {
+          const newState = !h.completedToday;
+          return { ...h, completedToday: newState, streak: newState ? h.streak + 1 : Math.max(0, h.streak - 1) };
+        }
+        return h;
+      });
+      localStorage.setItem('habitsData', JSON.stringify(habitsData));
+      renderHabits();
+    }
+
+    function deleteHabit(id) {
+      habitsData = habitsData.filter(h => h.id !== id);
+      localStorage.setItem('habitsData', JSON.stringify(habitsData));
+      renderHabits();
+    }
+
+    function renderHabits() {
+      const list = document.getElementById('habits-list');
+      list.innerHTML = '';
+
+      if (habitsData.length === 0) {
+        list.innerHTML = `<li style="color: var(--text-muted); justify-content: center;">No habits added yet.</li>`;
+        return;
+      }
+
+      habitsData.forEach(h => {
+        const li = document.createElement('li');
+        if (h.completedToday) li.classList.add('completed');
+        li.innerHTML = `
+          <div class="item-left">
+            <input type="checkbox" ${h.completedToday ? 'checked' : ''} onchange="toggleHabit(${h.id})">
+            <div class="exercise-details">
+              <span class="exercise-title">${h.name}</span>
+              <span class="exercise-meta" style="color: var(--accent); font-weight: 700;">🔥 ${h.streak} Day Streak</span>
+            </div>
+          </div>
+          <button class="btn-delete" onclick="deleteHabit(${h.id})">✕</button>
+        `;
+        list.appendChild(li);
+      });
     }
 
     // --- BIBLE VERSE SYSTEM ---
@@ -734,7 +925,7 @@
       });
     }
 
-    // --- WORKOUT SPLITS & JOURNAL SYSTEM ---
+    // --- WORKOUT SPLITS & PR TRACKER ---
     function renderSplits() {
       const menu = document.getElementById('splits-menu');
       menu.innerHTML = '';
@@ -761,6 +952,7 @@
       }
 
       renderWorkouts();
+      renderPRs();
       renderJournal();
     }
 
@@ -817,6 +1009,51 @@
             </div>
           </div>
           <button class="btn-delete" onclick="deleteExercise(${ex.id})">Delete</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // PR Tracker Functions
+    function addPR() {
+      const lift = document.getElementById('pr-lift-input').value.trim();
+      const weight = document.getElementById('pr-weight-input').value.trim();
+
+      if (!lift || !weight) return;
+
+      const item = { id: Date.now(), lift, weight };
+      prData.push(item);
+      localStorage.setItem('prData', JSON.stringify(prData));
+
+      document.getElementById('pr-lift-input').value = '';
+      document.getElementById('pr-weight-input').value = '';
+
+      renderPRs();
+    }
+
+    function deletePR(id) {
+      prData = prData.filter(p => p.id !== id);
+      localStorage.setItem('prData', JSON.stringify(prData));
+      renderPRs();
+    }
+
+    function renderPRs() {
+      const list = document.getElementById('pr-list');
+      list.innerHTML = '';
+
+      if (prData.length === 0) {
+        list.innerHTML = `<li style="color: var(--text-muted); justify-content: center;">No PRs recorded yet.</li>`;
+        return;
+      }
+
+      prData.forEach(pr => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="exercise-details">
+            <span class="exercise-title">${pr.lift}</span>
+            <span class="exercise-meta" style="color: var(--accent); font-weight: 700;">${pr.weight}</span>
+          </div>
+          <button class="btn-delete" onclick="deletePR(${pr.id})">✕</button>
         `;
         list.appendChild(li);
       });
@@ -1163,7 +1400,10 @@
     }
 
     // --- INITIAL APP LOAD ---
+    changeTheme(currentTheme);
+    renderWaterTracker();
     renderTasks();
+    renderHabits();
     renderSplits();
     renderMealCategories();
     renderNoteFolders();
