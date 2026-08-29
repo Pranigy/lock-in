@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lock In">
+  <meta name="theme-color" content="#080c14">
+  
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Lock In App","short_name":"LockIn","start_url":".","display":"standalone","background_color":"#080c14","theme_color":"#080c14"}'>
+
   <title>Lock In - Ultimate Focus & Fitness</title>
   <style>
     :root {
@@ -14,7 +23,6 @@
       --accent-glow: rgba(99, 102, 241, 0.25);
       --danger: #ef4444;
       --success: #10b981;
-      --xp-gold: #f59e0b;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --border: #2e3d5c;
@@ -25,6 +33,7 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -54,83 +63,6 @@
       text-transform: uppercase;
       font-weight: 900;
       text-shadow: 0 0 15px var(--accent-glow);
-    }
-
-    /* XP & Level Dashboard Banner */
-    .level-banner {
-      background: linear-gradient(135deg, #1e1b4b, #312e81);
-      border: 1px solid var(--accent);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px var(--accent-glow);
-    }
-
-    .level-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .level-title {
-      font-size: 1.2rem;
-      font-weight: 900;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .level-badge {
-      background: var(--accent);
-      color: #fff;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-    }
-
-    .xp-counter {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--xp-gold);
-    }
-
-    .xp-bar-container {
-      width: 100%;
-      height: 10px;
-      background-color: var(--card-inner);
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-
-    .xp-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--xp-gold));
-      transition: width 0.4s ease;
-    }
-
-    /* Floating XP Notification Toast */
-    .xp-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: var(--xp-gold);
-      color: #000;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-weight: 800;
-      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-      transition: transform 0.4s ease;
-      z-index: 1000;
-      pointer-events: none;
-    }
-
-    .xp-toast.show {
-      transform: translateX(-50%) translateY(0);
     }
 
     /* Tabs */
@@ -406,6 +338,44 @@
       color: var(--text-muted);
     }
 
+    /* Calendar Journal Log */
+    .journal-entry {
+      background-color: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .journal-date {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .journal-split {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .journal-ex-list {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      padding-left: 16px;
+      list-style-type: disc;
+    }
+
+    .journal-ex-list li {
+      background: none;
+      border: none;
+      padding: 2px 0;
+      margin: 0;
+      display: list-item;
+    }
+
     /* Bottom Nav */
     nav {
       position: fixed;
@@ -445,25 +415,10 @@
 </head>
 <body>
 
-  <div id="xp-toast" class="xp-toast">+50 XP</div>
-
   <div class="app-container">
     <header>
       <h1>Lock In</h1>
     </header>
-
-    <div class="level-banner">
-      <div class="level-header">
-        <div class="level-title">
-          <span>Level</span>
-          <span class="level-badge" id="player-level">1</span>
-        </div>
-        <div class="xp-counter" id="xp-counter">0 / 100 XP</div>
-      </div>
-      <div class="xp-bar-container">
-        <div class="xp-bar-fill" id="xp-bar-fill"></div>
-      </div>
-    </div>
 
     <section id="lockin" class="tab-content active">
       <div class="card">
@@ -495,7 +450,7 @@
       </div>
 
       <div class="card">
-        <h2>Session Goals / Tasks (+20 XP)</h2>
+        <h2>Session Goals / Tasks</h2>
         <div class="form-row">
           <input type="text" id="task-input" placeholder="What are you locking in on?">
           <button onclick="addTask()" style="width: 80px;">Add</button>
@@ -507,26 +462,26 @@
     <section id="workout" class="tab-content">
       <div class="category-menu" id="splits-menu"></div>
 
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h2 id="workout-split-title" style="margin:0;">Workout Routine</h2>
-          <button class="btn-small" onclick="addCustomSplit()" style="background: var(--card-inner); border: 1px solid var(--border);">+ New Split</button>
-        </div>
+      <div class="card" id="workout-form-card">
+        <h2 id="workout-split-title">Workout Routine</h2>
 
         <input type="text" id="exercise-name" placeholder="Exercise Name (e.g. Bench Press)">
         <div class="form-row">
           <input type="number" id="exercise-sets" placeholder="Sets">
           <input type="number" id="exercise-reps" placeholder="Reps">
         </div>
-        <button onclick="addExercise()">Add Exercise (+15 XP)</button>
+        <button onclick="addExercise()">Add Exercise</button>
       </div>
 
       <div class="card">
-        <h2>
-          <span>Planned Exercises (+25 XP Complete)</span>
-          <button class="btn-delete" onclick="deleteCurrentSplit()" id="delete-split-btn">Delete Split</button>
-        </h2>
+        <h2>Planned Exercises</h2>
         <ul id="workout-list"></ul>
+        <button onclick="logWorkoutSession()" style="background-color: var(--success); margin-top: 10px;">Save Workout to Calendar Log</button>
+      </div>
+
+      <div class="card">
+        <h2>Workout Journal Log</h2>
+        <div id="journal-list"></div>
       </div>
     </section>
 
@@ -553,7 +508,7 @@
           <input type="number" id="calories-input" placeholder="Calories">
           <input type="number" id="protein-input" placeholder="Protein (g)">
         </div>
-        <button onclick="addDietEntry()">Log Meal (+15 XP)</button>
+        <button onclick="addDietEntry()">Log Meal</button>
       </div>
 
       <div class="card">
@@ -566,7 +521,7 @@
       <div class="card verse-card">
         <div class="verse-text" id="verse-text">"I can do all things through Christ who strengthens me."</div>
         <div class="verse-ref" id="verse-ref">Philippians 4:13</div>
-        <button onclick="getRandomVerse()" style="margin-bottom:0;">Randomize Verse (+10 XP)</button>
+        <button onclick="getRandomVerse()" style="margin-bottom:0;">Randomize Verse</button>
       </div>
     </section>
 
@@ -579,7 +534,7 @@
         <textarea id="note-input" rows="3" placeholder="Write thoughts, goals, PRs..."></textarea>
         
         <div class="form-row" style="margin-bottom:0;">
-          <button onclick="saveNote()">Save Note (+15 XP)</button>
+          <button onclick="saveNote()">Save Note</button>
           <button class="btn-small" onclick="addCustomFolder()" style="background: var(--card-inner); border: 1px solid var(--border); width: 120px;">+ New Folder</button>
         </div>
       </div>
@@ -610,60 +565,29 @@
   </nav>
 
   <script>
-    // --- GAMIFICATION / XP SYSTEM ---
-    let xp = parseInt(localStorage.getItem('userXP')) || 0;
-
-    function getXpForLevel(lvl) {
-      return lvl * 100; // Level 1 needs 100, Level 2 needs 200, etc.
-    }
-
-    function addXP(amount, reason) {
-      xp += amount;
-      localStorage.setItem('userXP', xp);
-      showXPToast(`+${amount} XP: ${reason}`);
-      updateXPDisplay();
-    }
-
-    function updateXPDisplay() {
-      let currentLevel = 1;
-      let remainingXP = xp;
-
-      while (remainingXP >= getXpForLevel(currentLevel)) {
-        remainingXP -= getXpForLevel(currentLevel);
-        currentLevel++;
-      }
-
-      const neededXP = getXpForLevel(currentLevel);
-      const percentage = (remainingXP / neededXP) * 100;
-
-      document.getElementById('player-level').innerText = currentLevel;
-      document.getElementById('xp-counter').innerText = `${remainingXP} / ${neededXP} XP`;
-      document.getElementById('xp-bar-fill').style.width = `${percentage}%`;
-    }
-
-    function showXPToast(msg) {
-      const toast = document.getElementById('xp-toast');
-      toast.innerText = msg;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2000);
-    }
-
     // --- PERSISTENT APP STATE ---
     let focusTasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
     
-    // Workout Splits State
-    let workoutSplits = JSON.parse(localStorage.getItem('workoutSplits')) || ['Push', 'Pull', 'Legs', 'Upper', 'Lower'];
-    let selectedSplit = localStorage.getItem('selectedSplit') || 'Push';
+    // Fixed Weekly Workout Rotation
+    const weeklySplits = ['Friday (Push)', 'Saturday (Pull)', 'Sunday (Legs)', 'Monday (Rest)', 'Tuesday (Upper)', 'Wednesday (Lower)', 'Thursday (Rest)'];
+    let selectedSplit = localStorage.getItem('selectedSplit') || 'Friday (Push)';
     let workoutsData = JSON.parse(localStorage.getItem('workoutsData')) || {
-      Push: [], Pull: [], Legs: [], Upper: [], Lower: []
+      'Friday (Push)': [],
+      'Saturday (Pull)': [],
+      'Sunday (Legs)': [],
+      'Monday (Rest)': [],
+      'Tuesday (Upper)': [],
+      'Wednesday (Lower)': [],
+      'Thursday (Rest)': []
     };
+
+    // Calendar / Journal State
+    let workoutJournal = JSON.parse(localStorage.getItem('workoutJournal')) || [];
 
     // Diet State
     let dietData = JSON.parse(localStorage.getItem('dietData')) || [];
 
-    // Notes Folders State
+    // Notes State
     let noteFolders = JSON.parse(localStorage.getItem('noteFolders')) || ['General', 'Fitness Goals', 'Ideas'];
     let selectedFolder = localStorage.getItem('selectedFolder') || 'General';
     let notesData = JSON.parse(localStorage.getItem('notesData')) || [];
@@ -700,7 +624,6 @@
       const verse = bibleVerses[randomIndex];
       document.getElementById('verse-text').innerText = `"${verse.text}"`;
       document.getElementById('verse-ref').innerText = verse.ref;
-      addXP(10, 'Daily Inspiration Read');
     }
 
     // --- FOCUS TIMER & TASKS ---
@@ -737,7 +660,6 @@
             clearInterval(timerInterval);
             timerInterval = null;
             btn.innerText = 'Start Session';
-            addXP(50, 'Completed Focus Session');
             alert('Focus Session Complete! Lock in on your next target.');
           }
         }, 1000);
@@ -763,14 +685,7 @@
     }
 
     function toggleTask(id) {
-      focusTasks = focusTasks.map(t => {
-        if (t.id === id) {
-          const newState = !t.completed;
-          if (newState) addXP(20, 'Task Completed');
-          return { ...t, completed: newState };
-        }
-        return t;
-      });
+      focusTasks = focusTasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
       localStorage.setItem('focusTasks', JSON.stringify(focusTasks));
       renderTasks();
     }
@@ -798,16 +713,12 @@
       });
     }
 
-    // --- WORKOUT SPLITS SYSTEM ---
+    // --- WORKOUT SPLITS & JOURNAL SYSTEM ---
     function renderSplits() {
       const menu = document.getElementById('splits-menu');
       menu.innerHTML = '';
 
-      if (!workoutSplits.includes(selectedSplit)) {
-        selectedSplit = workoutSplits[0] || 'Push';
-      }
-
-      workoutSplits.forEach(split => {
+      weeklySplits.forEach(split => {
         const btn = document.createElement('button');
         btn.className = `category-btn ${split === selectedSplit ? 'active' : ''}`;
         btn.innerText = split;
@@ -820,38 +731,17 @@
       });
 
       document.getElementById('workout-split-title').innerText = `${selectedSplit} Routine`;
+      
+      // Hide input form if it's a Rest day
+      const formCard = document.getElementById('workout-form-card');
+      if (selectedSplit.includes('Rest')) {
+        formCard.style.display = 'none';
+      } else {
+        formCard.style.display = 'block';
+      }
+
       renderWorkouts();
-    }
-
-    function addCustomSplit() {
-      const name = prompt('Enter new Split / Day name (e.g. Pull Day, Arms, Cardio):');
-      if (!name) return;
-      const cleanName = name.trim();
-      if (cleanName && !workoutSplits.includes(cleanName)) {
-        workoutSplits.push(cleanName);
-        workoutsData[cleanName] = [];
-        selectedSplit = cleanName;
-        localStorage.setItem('workoutSplits', JSON.stringify(workoutSplits));
-        localStorage.setItem('workoutsData', JSON.stringify(workoutsData));
-        localStorage.setItem('selectedSplit', selectedSplit);
-        renderSplits();
-      }
-    }
-
-    function deleteCurrentSplit() {
-      if (workoutSplits.length <= 1) {
-        alert('You must have at least one workout split.');
-        return;
-      }
-      if (confirm(`Delete the split "${selectedSplit}" and all its exercises?`)) {
-        workoutSplits = workoutSplits.filter(s => s !== selectedSplit);
-        delete workoutsData[selectedSplit];
-        selectedSplit = workoutSplits[0];
-        localStorage.setItem('workoutSplits', JSON.stringify(workoutSplits));
-        localStorage.setItem('workoutsData', JSON.stringify(workoutsData));
-        localStorage.setItem('selectedSplit', selectedSplit);
-        renderSplits();
-      }
+      renderJournal();
     }
 
     function addExercise() {
@@ -870,19 +760,11 @@
       document.getElementById('exercise-sets').value = '';
       document.getElementById('exercise-reps').value = '';
 
-      addXP(15, 'Exercise Logged');
       renderWorkouts();
     }
 
     function toggleExercise(id) {
-      workoutsData[selectedSplit] = workoutsData[selectedSplit].map(ex => {
-        if (ex.id === id) {
-          const newState = !ex.completed;
-          if (newState) addXP(25, 'Exercise Completed');
-          return { ...ex, completed: newState };
-        }
-        return ex;
-      });
+      workoutsData[selectedSplit] = workoutsData[selectedSplit].map(ex => ex.id === id ? { ...ex, completed: !ex.completed } : ex);
       localStorage.setItem('workoutsData', JSON.stringify(workoutsData));
       renderWorkouts();
     }
@@ -899,7 +781,7 @@
       const exercises = workoutsData[selectedSplit] || [];
 
       if (exercises.length === 0) {
-        list.innerHTML = `<li style="color: var(--text-muted); justify-content: center;">No exercises logged for ${selectedSplit}</li>`;
+        list.innerHTML = `<li style="color: var(--text-muted); justify-content: center;">${selectedSplit.includes('Rest') ? 'Rest Day - Take time to recover!' : 'No exercises planned yet.'}</li>`;
         return;
       }
 
@@ -920,6 +802,72 @@
       });
     }
 
+    // Save completed workout session into calendar log
+    function logWorkoutSession() {
+      const exercises = workoutsData[selectedSplit] || [];
+      const completedExercises = exercises.filter(ex => ex.completed);
+
+      if (completedExercises.length === 0) {
+        alert('Please check off at least one completed exercise before logging your session.');
+        return;
+      }
+
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      
+      const logItem = {
+        id: Date.now(),
+        date: today,
+        split: selectedSplit,
+        exercises: completedExercises.map(e => `${e.name} (${e.sets}x${e.reps})`)
+      };
+
+      workoutJournal.unshift(logItem);
+      localStorage.setItem('workoutJournal', JSON.stringify(workoutJournal));
+
+      // Reset checkboxes for that split
+      workoutsData[selectedSplit] = workoutsData[selectedSplit].map(ex => ({ ...ex, completed: false }));
+      localStorage.setItem('workoutsData', JSON.stringify(workoutsData));
+
+      renderWorkouts();
+      renderJournal();
+      alert('Workout saved to your Journal Log!');
+    }
+
+    function deleteJournalEntry(id) {
+      workoutJournal = workoutJournal.filter(j => j.id !== id);
+      localStorage.setItem('workoutJournal', JSON.stringify(workoutJournal));
+      renderJournal();
+    }
+
+    function renderJournal() {
+      const list = document.getElementById('journal-list');
+      list.innerHTML = '';
+
+      if (workoutJournal.length === 0) {
+        list.innerHTML = `<p style="color: var(--text-muted); text-align: center; font-size: 0.9rem;">No completed workouts logged yet.</p>`;
+        return;
+      }
+
+      workoutJournal.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'journal-entry';
+        
+        let exListHtml = entry.exercises.map(ex => `<li>${ex}</li>`).join('');
+
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div class="journal-date">${entry.date}</div>
+              <div class="journal-split">${entry.split}</div>
+            </div>
+            <button class="btn-delete" onclick="deleteJournalEntry(${entry.id})">✕</button>
+          </div>
+          <ul class="journal-ex-list">${exListHtml}</ul>
+        `;
+        list.appendChild(div);
+      });
+    }
+
     // --- DIET TRACKER ---
     function addDietEntry() {
       const food = document.getElementById('food-input').value.trim();
@@ -936,7 +884,6 @@
       document.getElementById('calories-input').value = '';
       document.getElementById('protein-input').value = '';
 
-      addXP(15, 'Meal Logged');
       renderDiet();
     }
 
@@ -1022,7 +969,6 @@
       document.getElementById('note-title-input').value = '';
       document.getElementById('note-input').value = '';
 
-      addXP(15, 'Note Saved');
       renderNotes();
     }
 
@@ -1061,7 +1007,6 @@
     }
 
     // --- INITIAL APP LOAD ---
-    updateXPDisplay();
     renderTasks();
     renderSplits();
     renderDiet();
