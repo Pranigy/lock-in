@@ -29,7 +29,6 @@
       --focus-ring: #a5b4fc;
     }
 
-    /* 8 Custom Themes */
     body.theme-matrix {
       --bg-color: #020d04;
       --card-bg: #071a0b;
@@ -569,17 +568,6 @@
       color: var(--accent);
       font-weight: bold;
     }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
   </style>
 </head>
 <body>
@@ -829,6 +817,27 @@
       { id: 3, name: "Stretching Routine", completedToday: false, streak: 2 }
     ];
 
+    /* DAILY RESET LOGIC FOR HABITS */
+    function checkDailyReset() {
+      const today = new Date().toDateString();
+      const lastSavedDate = localStorage.getItem('lastHabitResetDate');
+
+      if (lastSavedDate !== today) {
+        habitsData = habitsData.map(h => {
+          // If habit was NOT completed yesterday, streak resets to 0
+          // If it WAS completed yesterday, keep streak intact for today
+          const updatedStreak = h.completedToday ? h.streak : 0;
+          return {
+            ...h,
+            completedToday: false, // reset tick box daily
+            streak: updatedStreak
+          };
+        });
+        localStorage.setItem('habitsData', JSON.stringify(habitsData));
+        localStorage.setItem('lastHabitResetDate', today);
+      }
+    }
+
     const weeklySplits = ['Friday (Push)', 'Saturday (Pull)', 'Sunday (Legs)', 'Monday (Rest)', 'Tuesday (Upper)', 'Wednesday (Lower)', 'Thursday (Rest)'];
     let selectedSplit = localStorage.getItem('selectedSplit') || 'Friday (Push)';
     let workoutsData = JSON.parse(localStorage.getItem('workoutsData')) || {
@@ -908,7 +917,6 @@
       if (soundEnabled) playSound('success');
     }
 
-    // Attach click audio listener to buttons globally
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('button, .water-cup, .search-item');
       if (btn && soundEnabled && !btn.id?.includes('sound-btn')) {
@@ -1009,7 +1017,10 @@
           const newState = !h.completedToday;
           if (newState) playSound('success');
           else playSound('toggle');
-          return { ...h, completedToday: newState, streak: newState ? h.streak + 1 : Math.max(0, h.streak - 1) };
+          
+          // Increment streak on check, decrement on uncheck
+          const updatedStreak = newState ? h.streak + 1 : Math.max(0, h.streak - 1);
+          return { ...h, completedToday: newState, streak: updatedStreak };
         }
         return h;
       });
@@ -1024,6 +1035,7 @@
     }
 
     function renderHabits() {
+      checkDailyReset();
       const list = document.getElementById('habits-list');
       list.innerHTML = '';
 
@@ -1783,6 +1795,7 @@
     }
 
     // Initialize UI
+    checkDailyReset();
     document.getElementById('sound-btn').innerText = soundEnabled ? '🔊 Audio' : '🔇 Muted';
     changeTheme(currentTheme);
     renderWaterTracker();
