@@ -486,34 +486,49 @@
     </section>
 
     <section id="diet" class="tab-content">
+      <div class="category-menu" id="meal-category-menu"></div>
+
       <div class="card">
-        <h2>Daily Nutrition</h2>
+        <h2>
+          <span id="diet-category-title">Log Meal Item</span>
+          <button class="btn-small" onclick="addCustomMealCategory()" style="background: var(--card-inner); border: 1px solid var(--border);">+ New Category</button>
+        </h2>
+
         <div class="macro-tracker">
           <div>
             <div class="macro-val" id="total-cals">0</div>
-            <div class="macro-lbl">Total Cals</div>
+            <div class="macro-lbl">Category Cals</div>
           </div>
           <div>
             <div class="macro-val" id="total-protein">0g</div>
-            <div class="macro-lbl">Protein</div>
+            <div class="macro-lbl">Category Protein</div>
           </div>
           <div>
             <div class="macro-val" id="meal-count">0</div>
-            <div class="macro-lbl">Meals Logged</div>
+            <div class="macro-lbl">Items Logged</div>
           </div>
         </div>
 
-        <input type="text" id="food-input" placeholder="Food item (e.g. Protein Shake)">
+        <input type="text" id="food-input" placeholder="Food item (e.g. Chicken & Rice)">
         <div class="form-row">
           <input type="number" id="calories-input" placeholder="Calories">
           <input type="number" id="protein-input" placeholder="Protein (g)">
         </div>
-        <button onclick="addDietEntry()">Log Meal</button>
+        <button onclick="addDietEntry()">Log Item to Category</button>
       </div>
 
       <div class="card">
-        <h2>Today's Log</h2>
+        <h2>
+          <span>Category Food List</span>
+          <button class="btn-delete" onclick="deleteCurrentMealCategory()" id="delete-meal-cat-btn">Delete Category</button>
+        </h2>
         <ul id="diet-list"></ul>
+        <button onclick="logDietSession()" style="background-color: var(--success); margin-top: 10px;">Save Meals to Nutrition Journal</button>
+      </div>
+
+      <div class="card">
+        <h2>Nutrition Journal Log</h2>
+        <div id="diet-journal-list"></div>
       </div>
     </section>
 
@@ -581,11 +596,16 @@
       'Thursday (Rest)': []
     };
 
-    // Calendar / Journal State
+    // Calendar / Journal State for Workouts
     let workoutJournal = JSON.parse(localStorage.getItem('workoutJournal')) || [];
 
-    // Diet State
-    let dietData = JSON.parse(localStorage.getItem('dietData')) || [];
+    // Diet Categories State
+    let mealCategories = JSON.parse(localStorage.getItem('mealCategories')) || ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+    let selectedMealCategory = localStorage.getItem('selectedMealCategory') || 'Breakfast';
+    let dietData = JSON.parse(localStorage.getItem('dietData')) || {
+      Breakfast: [], Lunch: [], Dinner: [], Snacks: []
+    };
+    let dietJournal = JSON.parse(localStorage.getItem('dietJournal')) || [];
 
     // Notes State
     let noteFolders = JSON.parse(localStorage.getItem('noteFolders')) || ['General', 'Fitness Goals', 'Ideas'];
@@ -615,6 +635,7 @@
       btn.classList.add('active');
       
       if (tabId === 'workout') renderSplits();
+      if (tabId === 'diet') renderMealCategories();
       if (tabId === 'notes') renderNoteFolders();
     }
 
@@ -732,7 +753,6 @@
 
       document.getElementById('workout-split-title').innerText = `${selectedSplit} Routine`;
       
-      // Hide input form if it's a Rest day
       const formCard = document.getElementById('workout-form-card');
       if (selectedSplit.includes('Rest')) {
         formCard.style.display = 'none';
@@ -802,7 +822,6 @@
       });
     }
 
-    // Save completed workout session into calendar log
     function logWorkoutSession() {
       const exercises = workoutsData[selectedSplit] || [];
       const completedExercises = exercises.filter(ex => ex.completed);
@@ -824,7 +843,6 @@
       workoutJournal.unshift(logItem);
       localStorage.setItem('workoutJournal', JSON.stringify(workoutJournal));
 
-      // Reset checkboxes for that split
       workoutsData[selectedSplit] = workoutsData[selectedSplit].map(ex => ({ ...ex, completed: false }));
       localStorage.setItem('workoutsData', JSON.stringify(workoutsData));
 
@@ -868,7 +886,63 @@
       });
     }
 
-    // --- DIET TRACKER ---
+    // --- DIET CATEGORIES & NUTRITION JOURNAL SYSTEM ---
+    function renderMealCategories() {
+      const menu = document.getElementById('meal-category-menu');
+      menu.innerHTML = '';
+
+      if (!mealCategories.includes(selectedMealCategory)) {
+        selectedMealCategory = mealCategories[0] || 'Breakfast';
+      }
+
+      mealCategories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${cat === selectedMealCategory ? 'active' : ''}`;
+        btn.innerText = cat;
+        btn.onclick = () => {
+          selectedMealCategory = cat;
+          localStorage.setItem('selectedMealCategory', selectedMealCategory);
+          renderMealCategories();
+        };
+        menu.appendChild(btn);
+      });
+
+      document.getElementById('diet-category-title').innerText = `Log ${selectedMealCategory} Item`;
+      renderDiet();
+      renderDietJournal();
+    }
+
+    function addCustomMealCategory() {
+      const name = prompt('Enter new Meal Category name (e.g. Pre-Workout, Shakes, Night Snack):');
+      if (!name) return;
+      const cleanName = name.trim();
+      if (cleanName && !mealCategories.includes(cleanName)) {
+        mealCategories.push(cleanName);
+        dietData[cleanName] = [];
+        selectedMealCategory = cleanName;
+        localStorage.setItem('mealCategories', JSON.stringify(mealCategories));
+        localStorage.setItem('dietData', JSON.stringify(dietData));
+        localStorage.setItem('selectedMealCategory', selectedMealCategory);
+        renderMealCategories();
+      }
+    }
+
+    function deleteCurrentMealCategory() {
+      if (mealCategories.length <= 1) {
+        alert('You must have at least one meal category.');
+        return;
+      }
+      if (confirm(`Delete category "${selectedMealCategory}" and all its logged food items?`)) {
+        mealCategories = mealCategories.filter(c => c !== selectedMealCategory);
+        delete dietData[selectedMealCategory];
+        selectedMealCategory = mealCategories[0];
+        localStorage.setItem('mealCategories', JSON.stringify(mealCategories));
+        localStorage.setItem('dietData', JSON.stringify(dietData));
+        localStorage.setItem('selectedMealCategory', selectedMealCategory);
+        renderMealCategories();
+      }
+    }
+
     function addDietEntry() {
       const food = document.getElementById('food-input').value.trim();
       const calories = parseInt(document.getElementById('calories-input').value) || 0;
@@ -876,8 +950,9 @@
 
       if (!food) return;
 
-      const entry = { id: Date.now(), food, calories, protein };
-      dietData.push(entry);
+      const entry = { id: Date.now(), food, calories, protein, completed: true };
+      if (!dietData[selectedMealCategory]) dietData[selectedMealCategory] = [];
+      dietData[selectedMealCategory].push(entry);
       localStorage.setItem('dietData', JSON.stringify(dietData));
 
       document.getElementById('food-input').value = '';
@@ -887,8 +962,14 @@
       renderDiet();
     }
 
+    function toggleDietItem(id) {
+      dietData[selectedMealCategory] = dietData[selectedMealCategory].map(item => item.id === id ? { ...item, completed: !item.completed } : item);
+      localStorage.setItem('dietData', JSON.stringify(dietData));
+      renderDiet();
+    }
+
     function deleteDiet(id) {
-      dietData = dietData.filter(d => d.id !== id);
+      dietData[selectedMealCategory] = dietData[selectedMealCategory].filter(d => d.id !== id);
       localStorage.setItem('dietData', JSON.stringify(dietData));
       renderDiet();
     }
@@ -897,27 +978,102 @@
       const list = document.getElementById('diet-list');
       list.innerHTML = '';
       
+      const categoryItems = dietData[selectedMealCategory] || [];
       let totalCals = 0;
       let totalProtein = 0;
 
-      dietData.forEach(item => {
-        totalCals += item.calories;
-        totalProtein += item.protein;
+      if (categoryItems.length === 0) {
+        list.innerHTML = `<li style="color: var(--text-muted); justify-content: center;">No items added to ${selectedMealCategory} yet.</li>`;
+      } else {
+        categoryItems.forEach(item => {
+          if (item.completed) {
+            totalCals += item.calories;
+            totalProtein += item.protein;
+          }
 
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <div class="exercise-details">
-            <span class="exercise-title">${item.food}</span>
-            <span class="exercise-meta">${item.calories} kcal ${item.protein ? '• ' + item.protein + 'g protein' : ''}</span>
-          </div>
-          <button class="btn-delete" onclick="deleteDiet(${item.id})">✕</button>
-        `;
-        list.appendChild(li);
-      });
+          const li = document.createElement('li');
+          if (!item.completed) li.classList.add('completed');
+          li.innerHTML = `
+            <div class="item-left">
+              <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleDietItem(${item.id})">
+              <div class="exercise-details">
+                <span class="exercise-title">${item.food}</span>
+                <span class="exercise-meta">${item.calories} kcal ${item.protein ? '• ' + item.protein + 'g protein' : ''}</span>
+              </div>
+            </div>
+            <button class="btn-delete" onclick="deleteDiet(${item.id})">✕</button>
+          `;
+          list.appendChild(li);
+        });
+      }
 
       document.getElementById('total-cals').innerText = totalCals;
       document.getElementById('total-protein').innerText = totalProtein + 'g';
-      document.getElementById('meal-count').innerText = dietData.length;
+      document.getElementById('meal-count').innerText = categoryItems.filter(i => i.completed).length;
+    }
+
+    function logDietSession() {
+      const categoryItems = dietData[selectedMealCategory] || [];
+      const activeItems = categoryItems.filter(i => i.completed);
+
+      if (activeItems.length === 0) {
+        alert('Please add or check off at least one food item before logging your nutrition.');
+        return;
+      }
+
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      let dayCals = activeItems.reduce((sum, item) => sum + item.calories, 0);
+      let dayProtein = activeItems.reduce((sum, item) => sum + item.protein, 0);
+
+      const logItem = {
+        id: Date.now(),
+        date: today,
+        category: selectedMealCategory,
+        cals: dayCals,
+        protein: dayProtein,
+        items: activeItems.map(i => `${i.food} (${i.calories} kcal, ${i.protein}g protein)`)
+      };
+
+      dietJournal.unshift(logItem);
+      localStorage.setItem('dietJournal', JSON.stringify(dietJournal));
+
+      renderDietJournal();
+      alert('Nutrition logged to your Journal!');
+    }
+
+    function deleteDietJournalEntry(id) {
+      dietJournal = dietJournal.filter(j => j.id !== id);
+      localStorage.setItem('dietJournal', JSON.stringify(dietJournal));
+      renderDietJournal();
+    }
+
+    function renderDietJournal() {
+      const list = document.getElementById('diet-journal-list');
+      list.innerHTML = '';
+
+      if (dietJournal.length === 0) {
+        list.innerHTML = `<p style="color: var(--text-muted); text-align: center; font-size: 0.9rem;">No saved nutrition logs yet.</p>`;
+        return;
+      }
+
+      dietJournal.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'journal-entry';
+
+        let foodListHtml = entry.items.map(item => `<li>${item}</li>`).join('');
+
+        div.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <div class="journal-date">${entry.date}</div>
+              <div class="journal-split">${entry.category} — ${entry.cals} kcal | ${entry.protein}g protein</div>
+            </div>
+            <button class="btn-delete" onclick="deleteDietJournalEntry(${entry.id})">✕</button>
+          </div>
+          <ul class="journal-ex-list">${foodListHtml}</ul>
+        `;
+        list.appendChild(div);
+      });
     }
 
     // --- NOTES SYSTEM WITH FOLDERS ---
@@ -1009,7 +1165,7 @@
     // --- INITIAL APP LOAD ---
     renderTasks();
     renderSplits();
-    renderDiet();
+    renderMealCategories();
     renderNoteFolders();
   </script>
 </body>
