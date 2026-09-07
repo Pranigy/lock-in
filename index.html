@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOCKED - Fitness & Diet</title>
+  <title>LOCKED - Fitness & Habit System</title>
   <style>
     :root {
       --bg-color: #121212;
@@ -12,11 +12,11 @@
       --primary-variant: #3700b3;
       --secondary: #03dac6;
       --accent-orange: #ff9800;
+      --accent-green: #00e676;
       --tracked-bg: #2d1f3d;
       --text: #e0e0e0;
       --text-dim: #a0a0a0;
       --danger: #cf6679;
-      --gold-glow: #ffd700;
     }
 
     * {
@@ -35,7 +35,7 @@
       position: relative;
     }
 
-    /* SPLASH SCREEN ANIMATION STYLES */
+    /* SPLASH SCREEN ANIMATION */
     #splash-screen {
       position: fixed;
       top: 0;
@@ -134,14 +134,8 @@
       100% { letter-spacing: 12px; opacity: 1; }
     }
 
-    @keyframes fadeIn {
-      to { opacity: 0.8; }
-    }
-
-    @keyframes loadFill {
-      0% { width: 0%; }
-      100% { width: 100%; }
-    }
+    @keyframes fadeIn { to { opacity: 0.8; } }
+    @keyframes loadFill { 0% { width: 0%; } 100% { width: 100%; } }
 
     /* App Tab Navigation */
     .tab-bar {
@@ -150,15 +144,17 @@
       border-radius: 10px;
       margin-bottom: 15px;
       padding: 4px;
+      gap: 4px;
     }
 
     .tab-btn {
       flex: 1;
-      padding: 10px;
+      padding: 10px 4px;
       background: none;
       border: none;
       color: var(--text-dim);
       font-weight: bold;
+      font-size: 0.85em;
       border-radius: 8px;
       cursor: pointer;
     }
@@ -237,6 +233,21 @@
       right: 4px;
     }
 
+    .day.has-quit-clean {
+      background-color: #123824 !important;
+      border: 1px solid var(--accent-green) !important;
+    }
+
+    .day.has-quit-clean::before {
+      content: '✓';
+      font-size: 0.65em;
+      color: var(--accent-green);
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-weight: bold;
+    }
+
     .day.selected {
       background-color: var(--primary-variant) !important;
       border-color: #fff !important;
@@ -271,17 +282,14 @@
       cursor: pointer;
     }
 
-    button.secondary-btn {
-      background-color: var(--secondary);
-    }
+    button.secondary-btn { background-color: var(--secondary); }
+    button.clean-btn { background-color: var(--accent-green); color: #000; }
+    button.danger-btn { background-color: var(--danger); color: #fff; }
 
-    .row {
-      display: flex;
-      gap: 10px;
-    }
+    .row { display: flex; gap: 10px; }
 
     /* Lists */
-    .exercise-item, .meal-item {
+    .exercise-item, .meal-item, .addiction-item {
       background-color: #2a2a2a;
       padding: 12px;
       border-radius: 8px;
@@ -326,9 +334,7 @@
       cursor: pointer;
     }
 
-    .delete-btn {
-      color: var(--danger);
-    }
+    .delete-btn { color: var(--danger); }
 
     /* Macro Progress Bars */
     .macro-bar-bg {
@@ -346,26 +352,25 @@
       transition: width 0.3s;
     }
 
-    .hidden {
-      display: none;
+    .streak-badge {
+      font-size: 1.3em;
+      font-weight: 800;
+      color: var(--accent-green);
+      margin-top: 4px;
     }
 
-    .loading-spinner {
-      text-align: center;
-      color: var(--accent-orange);
-      font-size: 0.9em;
-      padding: 8px;
-    }
+    .hidden { display: none; }
+    .loading-spinner { text-align: center; color: var(--accent-orange); font-size: 0.9em; padding: 8px; }
   </style>
 </head>
 <body>
 
-  <!-- COOL INTRO ANIMATION SCREEN -->
+  <!-- INTRO ANIMATION SCREEN -->
   <div id="splash-screen">
     <div class="brand-container">
       <div class="icon-wrapper">🔒</div>
       <h1 class="brand-name">LOCKED</h1>
-      <div class="brand-sub">FITNESS & DIET SYSTEM</div>
+      <div class="brand-sub">FITNESS & HABIT SYSTEM</div>
       <div class="loader-bar">
         <div class="loader-progress"></div>
       </div>
@@ -375,7 +380,8 @@
   <!-- Navigation Tabs -->
   <div class="tab-bar">
     <button class="tab-btn active" id="tabWorkoutBtn" onclick="switchTab('workout')">🏋️ Workouts</button>
-    <button class="tab-btn" id="tabDietBtn" onclick="switchTab('diet')">🥗 Diet & Macros</button>
+    <button class="tab-btn" id="tabDietBtn" onclick="switchTab('diet')">🥗 Diet</button>
+    <button class="tab-btn" id="tabQuitBtn" onclick="switchTab('quit')">🚫 Quit</button>
   </div>
 
   <!-- Calendar Section -->
@@ -392,7 +398,6 @@
   <div class="card" id="workoutSection">
     <h2 id="selectedDateWorkoutTitle" style="font-size: 1.1em; color: var(--secondary);">Selected Date</h2>
     
-    <!-- Load Template -->
     <div style="margin-bottom: 12px;">
       <label style="font-size: 0.8em; color: var(--text-dim);">Load Split Template:</label>
       <div class="row">
@@ -401,12 +406,10 @@
       </div>
     </div>
 
-    <!-- Day Label -->
     <div style="border-top: 1px solid #333; padding-top: 10px;">
       <input type="text" id="dayTypeInput" placeholder="Split Name (e.g. Upper Body)" oninput="saveDayType()">
     </div>
 
-    <!-- Add Exercise Form -->
     <div style="margin-top: 10px;">
       <input type="text" id="exName" placeholder="Exercise (e.g. Bench Press)">
       <div class="row">
@@ -416,7 +419,6 @@
       <button onclick="addExercise()">+ Add Exercise</button>
     </div>
 
-    <!-- Exercises List -->
     <div style="margin-top: 15px;">
       <h3>Today's Workout</h3>
       <div id="exerciseList"></div>
@@ -431,14 +433,12 @@
   <div class="card hidden" id="dietSection">
     <h2 id="selectedDateDietTitle" style="font-size: 1.1em; color: var(--accent-orange);">Selected Date</h2>
 
-    <!-- Macro Summary Progress Card -->
     <div style="background:#262626; padding:12px; border-radius:8px; margin-bottom:15px;">
       <div class="item-header">
         <h3>Daily Totals</h3>
         <button style="width:auto; padding:4px 8px; font-size:0.75em;" onclick="toggleGoalInputs()">Edit Goals</button>
       </div>
 
-      <!-- Goal Setup Inputs -->
       <div id="goalInputs" class="hidden" style="margin-top:10px;">
         <div class="row">
           <input type="number" id="goalCals" placeholder="Calorie Goal">
@@ -448,7 +448,6 @@
         <button onclick="saveGoals()" style="padding:6px; font-size:0.85em;">Save Daily Goals</button>
       </div>
 
-      <!-- Progress Bars -->
       <div style="margin-top:10px;">
         <div style="font-size:0.85em; display:flex; justify-content:space-between;">
           <span>Calories: <strong id="currCals">0</strong> / <span id="targetCals">2000</span> kcal</span>
@@ -467,7 +466,6 @@
       </div>
     </div>
 
-    <!-- Web Search Food Entry -->
     <div>
       <h3>🌐 Search Web Nutrition</h3>
       <input type="text" id="webFoodInput" placeholder="e.g., 3 large eggs OR 200g chicken breast">
@@ -475,7 +473,6 @@
       <div id="loadingStatus" class="loading-spinner hidden">Searching web for nutritional data...</div>
     </div>
 
-    <!-- Manual Entry Option -->
     <details style="margin-top:10px; font-size:0.85em; color:var(--text-dim);">
       <summary>+ Manual Food Entry</summary>
       <div style="margin-top:8px;">
@@ -489,7 +486,6 @@
       </div>
     </details>
 
-    <!-- Meals List -->
     <div style="margin-top: 15px;">
       <div class="item-header">
         <h3>Logged Meals</h3>
@@ -499,8 +495,25 @@
     </div>
   </div>
 
+  <!-- QUIT HABITS SECTION -->
+  <div class="card hidden" id="quitSection">
+    <h2 id="selectedDateQuitTitle" style="font-size: 1.1em; color: var(--accent-green);">Selected Date</h2>
+
+    <!-- Add Addiction Form -->
+    <div style="margin-bottom: 15px;">
+      <h3>🚫 Track Habit / Addiction to Quit</h3>
+      <input type="text" id="addictionInput" placeholder="e.g., Vaping, Sugar, Social Media">
+      <button class="clean-btn" onclick="addAddiction()">+ Start Addiction Streak Tracker</button>
+    </div>
+
+    <!-- Active Addiction Tracker List -->
+    <div style="margin-top: 15px;">
+      <h3>Active Streak Trackers</h3>
+      <div id="addictionList" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
   <script>
-    // Splash Screen Auto Dismiss
     window.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         const splash = document.getElementById('splash-screen');
@@ -516,6 +529,7 @@
     let workoutData = JSON.parse(localStorage.getItem('workoutData')) || {};
     let templates = JSON.parse(localStorage.getItem('workoutTemplates')) || {};
     let dietGoals = JSON.parse(localStorage.getItem('dietGoals')) || { calories: 2000, protein: 150, carbs: 200 };
+    let addictions = JSON.parse(localStorage.getItem('addictions')) || [];
 
     function formatDate(date) {
       const y = date.getFullYear();
@@ -528,17 +542,22 @@
       activeTab = tab;
       document.getElementById('tabWorkoutBtn').classList.toggle('active', tab === 'workout');
       document.getElementById('tabDietBtn').classList.toggle('active', tab === 'diet');
+      document.getElementById('tabQuitBtn').classList.toggle('active', tab === 'quit');
+
       document.getElementById('workoutSection').classList.toggle('hidden', tab !== 'workout');
       document.getElementById('dietSection').classList.toggle('hidden', tab !== 'diet');
+      document.getElementById('quitSection').classList.toggle('hidden', tab !== 'quit');
     }
 
     function saveData() {
       localStorage.setItem('workoutData', JSON.stringify(workoutData));
       localStorage.setItem('workoutTemplates', JSON.stringify(templates));
       localStorage.setItem('dietGoals', JSON.stringify(dietGoals));
+      localStorage.setItem('addictions', JSON.stringify(addictions));
       renderCalendar();
       renderWorkoutSection();
       renderDietSection();
+      renderQuitSection();
       renderTemplates();
     }
 
@@ -586,6 +605,7 @@
         const dayData = workoutData[dateStr] || {};
         const hasWorkout = (dayData.type && dayData.type.trim() !== '') || (dayData.exercises && dayData.exercises.length > 0);
         const hasDiet = dayData.meals && dayData.meals.length > 0;
+        const hasQuitClean = dayData.quitClean && dayData.quitClean.length > 0;
 
         if (hasWorkout) {
           dayEl.classList.add('has-workout');
@@ -598,6 +618,7 @@
         }
 
         if (hasDiet) dayEl.classList.add('has-diet');
+        if (hasQuitClean) dayEl.classList.add('has-quit-clean');
         if (dateStr === todayStr) dayEl.classList.add('today');
         if (dateStr === selectedDateStr) dayEl.classList.add('selected');
 
@@ -606,6 +627,7 @@
           renderCalendar();
           renderWorkoutSection();
           renderDietSection();
+          renderQuitSection();
         };
 
         grid.appendChild(dayEl);
@@ -620,7 +642,6 @@
     /* WORKOUT LOGIC */
     function renderWorkoutSection() {
       document.getElementById('selectedDateWorkoutTitle').innerText = `Date: ${selectedDateStr}`;
-      
       const dayData = workoutData[selectedDateStr] || { type: '', exercises: [] };
       document.getElementById('dayTypeInput').value = dayData.type || '';
 
@@ -660,7 +681,7 @@
 
     function saveDayType() {
       const type = document.getElementById('dayTypeInput').value;
-      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [] };
+      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [], quitClean: [] };
       workoutData[selectedDateStr].type = type;
       localStorage.setItem('workoutData', JSON.stringify(workoutData));
       renderCalendar();
@@ -673,7 +694,7 @@
 
       if (!name || !sets || !reps) return alert('Please enter exercise name, sets, and reps.');
 
-      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [] };
+      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [], quitClean: [] };
       workoutData[selectedDateStr].exercises.push({ name, sets, reps, completedSets: Array(sets).fill(false) });
 
       document.getElementById('exName').value = '';
@@ -715,7 +736,7 @@
     function loadTemplate() {
       const selectedTemplate = document.getElementById('templateSelect').value;
       if (!selectedTemplate || !templates[selectedTemplate]) return alert('Select a template.');
-      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [] };
+      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [], quitClean: [] };
 
       workoutData[selectedDateStr].type = selectedTemplate;
       workoutData[selectedDateStr].exercises = templates[selectedTemplate].map(ex => ({
@@ -742,7 +763,6 @@
 
     function renderDietSection() {
       document.getElementById('selectedDateDietTitle').innerText = `Date: ${selectedDateStr}`;
-
       const dayMeals = (workoutData[selectedDateStr] && workoutData[selectedDateStr].meals) ? workoutData[selectedDateStr].meals : [];
 
       let totCals = 0, totProt = 0, totCarbs = 0;
@@ -771,7 +791,6 @@
         list.appendChild(item);
       });
 
-      // Update Goals UI
       document.getElementById('currCals').innerText = totCals;
       document.getElementById('targetCals').innerText = dietGoals.calories;
       document.getElementById('calBar').style.width = `${Math.min(100, (totCals / dietGoals.calories) * 100)}%`;
@@ -785,7 +804,7 @@
       document.getElementById('carbsBar').style.width = `${Math.min(100, (totCarbs / dietGoals.carbs) * 100)}%`;
     }
 
-    /* REAL-TIME WEB SEARCH & PARSER (FREE) */
+    /* REAL-TIME WEB SEARCH */
     async function searchWebFood() {
       const inputVal = document.getElementById('webFoodInput').value.trim();
       if (!inputVal) return alert('Enter a food and quantity (e.g. 3 eggs or 200g chicken).');
@@ -799,11 +818,8 @@
       const gramMatch = inputVal.match(/^(\d+)\s*g\b/i);
       const countMatch = inputVal.match(/^(\d+)\s+/);
 
-      if (gramMatch) {
-        gramWeight = parseFloat(gramMatch[1]);
-      } else if (countMatch) {
-        quantity = parseFloat(countMatch[1]);
-      }
+      if (gramMatch) gramWeight = parseFloat(gramMatch[1]);
+      else if (countMatch) quantity = parseFloat(countMatch[1]);
 
       const query = `nutrition calories protein carbs ${inputVal}`;
       const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`;
@@ -836,13 +852,7 @@
           carbs = Math.round(carbs * quantity);
         }
 
-        addMealToLog({
-          name: inputVal,
-          calories: cals,
-          protein: protein,
-          carbs: carbs
-        });
-
+        addMealToLog({ name: inputVal, calories: cals, protein, carbs });
         document.getElementById('webFoodInput').value = '';
       } catch (err) {
         alert('Could not retrieve web search data. Added manual entry prompt.');
@@ -889,7 +899,6 @@
       const carbs = parseInt(document.getElementById('manualCarbs').value) || 0;
 
       if (!name) return alert('Please enter a food name.');
-
       addMealToLog({ name, calories: cals, protein, carbs });
 
       document.getElementById('manualName').value = '';
@@ -899,9 +908,8 @@
     }
 
     function addMealToLog(mealObj) {
-      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [] };
+      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [], quitClean: [] };
       if (!workoutData[selectedDateStr].meals) workoutData[selectedDateStr].meals = [];
-
       workoutData[selectedDateStr].meals.push(mealObj);
       saveData();
     }
@@ -935,10 +943,122 @@
       }
     }
 
+    /* QUIT HABITS TAB LOGIC */
+    function addAddiction() {
+      const input = document.getElementById('addictionInput').value.trim();
+      if (!input) return alert('Please enter a habit or addiction name.');
+
+      addictions.push({
+        id: Date.now(),
+        name: input,
+        streak: 0,
+        cleanDates: []
+      });
+
+      document.getElementById('addictionInput').value = '';
+      saveData();
+    }
+
+    function deleteAddiction(id) {
+      addictions = addictions.filter(a => a.id !== id);
+      saveData();
+    }
+
+    function logCleanDay(addictionId) {
+      const a = addictions.find(item => item.id === addictionId);
+      if (!a) return;
+
+      if (!a.cleanDates.includes(selectedDateStr)) {
+        a.cleanDates.push(selectedDateStr);
+        a.streak = calculateStreak(a.cleanDates);
+      }
+
+      if (!workoutData[selectedDateStr]) workoutData[selectedDateStr] = { type: '', exercises: [], meals: [], quitClean: [] };
+      if (!workoutData[selectedDateStr].quitClean) workoutData[selectedDateStr].quitClean = [];
+      if (!workoutData[selectedDateStr].quitClean.includes(a.name)) {
+        workoutData[selectedDateStr].quitClean.push(a.name);
+      }
+
+      saveData();
+    }
+
+    function resetStreak(addictionId) {
+      const a = addictions.find(item => item.id === addictionId);
+      if (!a) return;
+
+      if (confirm(`Are you sure you want to reset your "${a.name}" streak?`)) {
+        a.cleanDates = a.cleanDates.filter(d => d !== selectedDateStr);
+        a.streak = 0;
+
+        if (workoutData[selectedDateStr] && workoutData[selectedDateStr].quitClean) {
+          workoutData[selectedDateStr].quitClean = workoutData[selectedDateStr].quitClean.filter(name => name !== a.name);
+        }
+
+        saveData();
+      }
+    }
+
+    function calculateStreak(dates) {
+      if (!dates || dates.length === 0) return 0;
+      const sorted = [...dates].sort((a,b) => new Date(b) - new Date(a));
+      let streak = 0;
+      let checkDate = new Date();
+
+      for (let i = 0; i < 365; i++) {
+        const dateStr = formatDate(checkDate);
+        if (sorted.includes(dateStr)) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else if (i === 0) {
+          // If today isn't logged yet, check if yesterday was logged
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function renderQuitSection() {
+      document.getElementById('selectedDateQuitTitle').innerText = `Date: ${selectedDateStr}`;
+      const list = document.getElementById('addictionList');
+      list.innerHTML = '';
+
+      if (addictions.length === 0) {
+        list.innerHTML = `<p style="color: var(--text-dim); text-align: center; font-size:0.85em; margin-top:10px;">No habits added yet.</p>`;
+        return;
+      }
+
+      addictions.forEach(a => {
+        const isCleanToday = a.cleanDates && a.cleanDates.includes(selectedDateStr);
+        const item = document.createElement('div');
+        item.className = 'addiction-item';
+
+        item.innerHTML = `
+          <div class="item-header">
+            <div>
+              <strong>${a.name}</strong>
+              <div class="streak-badge">🔥 ${a.streak} Days Clean</div>
+            </div>
+            <button class="icon-btn delete-btn" onclick="deleteAddiction(${a.id})">✕</button>
+          </div>
+          <div style="margin-top:10px;" class="row">
+            ${isCleanToday ? 
+              `<button style="background:#2e7d32; color:#fff;" disabled>✓ Clean on ${selectedDateStr}</button>` : 
+              `<button class="clean-btn" onclick="logCleanDay(${a.id})">✅ Log Day Clean</button>`
+            }
+            <button class="danger-btn" style="width:110px;" onclick="resetStreak(${a.id})">Reset</button>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
     // Initialize Page
     renderCalendar();
     renderWorkoutSection();
     renderDietSection();
+    renderQuitSection();
     renderTemplates();
   </script>
 </body>
