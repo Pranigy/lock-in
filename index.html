@@ -1,1145 +1,557 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pulse & Sober - Elite Performance Engine</title>
-  <style>
-    :root {
-      --bg: #050811;
-      --card-bg: #0d1322;
-      --card-border: #1a253f;
-      --text-main: #f8fafc;
-      --text-muted: #64748b;
-      --accent-workout: #2563eb;
-      --accent-workout-glow: rgba(37, 99, 235, 0.3);
-      --accent-sober: #059669;
-      --accent-sober-glow: rgba(5, 150, 105, 0.3);
-      --danger: #dc2626;
-      --radius: 14px;
-      --radius-sm: 8px;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: #020408;
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 10px;
-    }
-
-    /* 9:16 Frame Container */
-    .phone-frame {
-      width: 100%;
-      max-width: 412px;
-      height: 890px;
-      max-height: 95vh;
-      background-color: var(--bg);
-      border: 4px solid #1e293b;
-      border-radius: 36px;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    }
-
-    .container {
-      flex: 1;
-      overflow-y: auto;
-      width: 100%;
-      padding: 14px;
-      padding-bottom: 74px;
-    }
-
-    /* Custom scrollbar for clean look */
-    .container::-webkit-scrollbar {
-      width: 4px;
-    }
-    .container::-webkit-scrollbar-thumb {
-      background: var(--card-border);
-      border-radius: 4px;
-    }
-
-    header {
-      margin-bottom: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 4px;
-    }
-
-    .app-title {
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing: -0.6px;
-      background: linear-gradient(135deg, #fff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .today-badge {
-      font-size: 0.65rem;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 4px 8px;
-      border-radius: 20px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-title {
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      letter-spacing: -0.3px;
-    }
-
-    .form-group {
-      margin-bottom: 10px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-weight: 700;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 9px 12px;
-      background: #03060c;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-sm);
-      color: var(--text-main);
-      font-size: 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--accent-workout);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 11px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .btn:active { transform: scale(0.98); }
-    .btn-workout { background: var(--accent-workout); color: #fff; box-shadow: 0 4px 12px var(--accent-workout-glow); }
-    .btn-sober { background: var(--accent-sober); color: #fff; box-shadow: 0 4px 12px var(--accent-sober-glow); }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-secondary { background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); color: var(--text-main); }
-    .btn-sm { padding: 4px 8px; font-size: 0.7rem; width: auto; font-weight: 600; }
-
-    .builder-row {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    /* Exercise Item Row */
-    .exercise-card {
-      background: rgba(3, 6, 12, 0.4);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 10px;
-      margin-bottom: 8px;
-    }
-
-    .exercise-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .exercise-name {
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-
-    .set-grid-header {
-      display: grid;
-      grid-template-columns: 28px 1fr 1fr 32px 28px;
-      gap: 4px;
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 4px;
-      padding: 0 2px;
-    }
-
-    .set-row {
-      display: grid;
-      grid-template-columns: 28px 1fr 1fr 32px 28px;
-      gap: 4px;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .set-num {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .set-check {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      border: 2px solid var(--card-border);
-      background: rgba(255,255,255,0.02);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      margin: 0 auto;
-      transition: all 0.15s;
-      font-size: 0.75rem;
-    }
-
-    .set-check.completed {
-      background: var(--accent-workout);
-      border-color: var(--accent-workout);
-      color: white;
-      box-shadow: 0 0 8px var(--accent-workout-glow);
-    }
-
-    .icon-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .icon-btn:hover { color: var(--danger); }
-
-    /* Dashboard Metrics */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .metric-box {
-      background: rgba(3, 6, 12, 0.4);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-      text-align: center;
-    }
-
-    .metric-value {
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-top: 2px;
-    }
-
-    .metric-label {
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    /* Real-Time Counter Grid */
-    .realtime-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
-      margin-bottom: 12px;
-    }
-
-    .rt-box {
-      background: rgba(3, 6, 12, 0.6);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      padding: 6px 2px;
-      text-align: center;
-    }
-
-    .rt-num {
-      font-size: 1.1rem;
-      font-weight: 800;
-      color: #34d399;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .rt-lbl {
-      font-size: 0.55rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    /* Calendar */
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .calendar-nav-btn {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      font-size: 0.9rem;
-      cursor: pointer;
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      text-align: center;
-    }
-
-    .day-name {
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      padding-bottom: 2px;
-    }
-
-    .calendar-day {
-      aspect-ratio: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.01);
-      font-size: 0.7rem;
-      cursor: pointer;
-      border: 1px solid transparent;
-      font-weight: 500;
-    }
-
-    .calendar-day.empty { background: transparent; cursor: default; }
-    .calendar-day.today { border-color: var(--text-main); font-weight: 800; }
-
-    .workout-view .calendar-day.logged {
-      background: rgba(37, 99, 235, 0.25);
-      border-color: var(--accent-workout);
-      color: #93c5fd;
-      font-weight: 700;
-    }
-
-    .sober-view .calendar-day.clean {
-      background: rgba(5, 150, 105, 0.2);
-      border-color: rgba(5, 150, 105, 0.4);
-      color: #6ee7b7;
-      font-weight: 700;
-    }
-
-    .sober-view .calendar-day.reset {
-      background: rgba(220, 38, 38, 0.25);
-      border-color: var(--danger);
-      color: #fca5a5;
-      font-weight: 700;
-    }
-
-    /* Navigation Bar */
-    .bottom-nav {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: #080c18;
-      border-top: 1px solid var(--card-border);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 1000;
-      border-bottom-left-radius: 32px;
-      border-bottom-right-radius: 32px;
-    }
-
-    .nav-item {
-      flex: 1;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.65rem;
-      font-weight: 700;
-      gap: 2px;
-      letter-spacing: -0.2px;
-    }
-
-    .nav-item svg { width: 18px; height: 18px; fill: currentColor; }
-    .nav-item.active-workout { color: #3b82f6; }
-    .nav-item.active-sober { color: #10b981; }
-
-    .view-section { display: none; }
-    .view-section.active { display: block; }
-
-    .modal-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(4px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-      z-index: 2000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-    .modal {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 16px;
-      width: 100%;
-      max-width: 340px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IronLog Workout Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+        /* Custom scrollbar for inner containers */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+    </style>
 </head>
-<body>
+<body class="bg-gray-950 text-gray-100 font-sans antialiased select-none flex items-center justify-center min-h-screen p-0 sm:p-4" x-data="workoutApp()">
 
-  <div class="phone-frame">
-    <div class="container">
-      <header>
-        <div>
-          <div class="app-title" id="app-heading">Pulse & Sober</div>
+    <!-- 9:16 ASPECT RATIO MOBILE SHELL CONTAINER -->
+    <div class="w-full sm:max-w-[400px] sm:h-[844px] h-screen bg-gray-950 sm:border-[8px] sm:border-gray-800 sm:rounded-[40px] flex flex-col relative overflow-hidden shadow-2xl">
+
+        <!-- TOP HEADER -->
+        <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-40 px-4 py-3 flex justify-between items-center shrink-0">
+            <div class="flex items-center space-x-2">
+                <div :class="{'bg-blue-600': theme==='blue', 'bg-emerald-600': theme==='emerald', 'bg-purple-600': theme==='purple', 'bg-amber-600': theme==='amber'}" class="text-white p-2 rounded-xl font-bold flex items-center justify-center w-9 h-9 transition-colors">
+                    <i class="fa-solid fa-dumbbell text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">IronLog</h1>
+                    <p class="text-xs text-gray-400">Streak: <span class="text-orange-400 font-semibold" x-text="streak"></span> Days 🔥</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button @click="openSettingsModal = true" class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-gear"></i></button>
+            </div>
+        </header>
+
+        <!-- SCROLLABLE CONTENT VIEWPORT -->
+        <main class="flex-1 overflow-y-auto p-4 pb-24">
+
+            <!-- TAB 1: WORKOUT SPLITS & ACTIVE WORKOUT -->
+            <template x-if="activeTab === 'splits'">
+                <div>
+                    <!-- VIEW A: SPLIT LIST -->
+                    <template x-if="!currentWorkoutSplit && !activeLogViewDate">
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold">Your Splits</h2>
+                                <button @click="openCreateModal()" :class="btnThemeClass" class="text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-plus text-xs"></i> New Split
+                                </button>
+                            </div>
+
+                            <div class="space-y-3">
+                                <template x-for="split in splits" :key="split.id">
+                                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-sm">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <span class="text-xs uppercase tracking-wider font-semibold px-2 py-0.5 rounded" :class="badgeThemeClass" x-text="split.presetName"></span>
+                                                <h3 class="text-lg font-bold mt-1" x-text="split.name"></h3>
+                                            </div>
+                                            <div class="flex gap-1">
+                                                <button @click="editSplit(split)" class="text-gray-500 hover:text-gray-200 p-1.5"><i class="fa-solid fa-pen text-xs"></i></button>
+                                                <button @click="deleteSplit(split.id)" class="text-gray-500 hover:text-red-400 p-1.5"><i class="fa-solid fa-trash text-xs"></i></button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="text-sm text-gray-400 mb-4">
+                                            <p><span class="font-medium text-gray-200" x-text="split.exercises.length"></span> Exercises configured</p>
+                                        </div>
+
+                                        <button @click="startWorkout(split)" :class="btnThemeClass" class="w-full text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md">
+                                            <i class="fa-solid fa-play text-xs"></i> Start Workout
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <template x-if="splits.length === 0">
+                                    <div class="text-center py-12 text-gray-500">
+                                        <i class="fa-solid fa-clipboard-list text-4xl mb-3"></i>
+                                        <p>No splits created yet. Create one to begin!</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- VIEW B: ACTIVE WORKOUT SESSION -->
+                    <template x-if="currentWorkoutSplit">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <button @click="currentWorkoutSplit = null" class="text-gray-400 hover:text-white text-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-left"></i> Cancel
+                                </button>
+                                <h2 class="font-bold text-sm text-center" :class="textThemeClass" x-text="currentWorkoutSplit.name"></h2>
+                                <div class="w-12"></div>
+                            </div>
+
+                            <div class="space-y-4 mb-6">
+                                <template x-for="(exercise, index) in currentWorkoutSplit.exercises" :key="index">
+                                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <h4 class="font-bold text-base text-gray-100" x-text="exercise.name"></h4>
+                                            <span class="text-xs text-gray-500">3 Sets</span>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <template x-for="setNum in [1, 2, 3]" :key="setNum">
+                                                <div class="flex items-center gap-2 bg-gray-950 p-2 rounded-xl border border-gray-800/60">
+                                                    <span class="text-xs font-bold text-gray-400 w-12" x-text="'Set ' + setNum"></span>
+                                                    <div class="flex-1 flex items-center gap-1">
+                                                        <input type="number" placeholder="Wt" x-model.number="exercise['set' + setNum].weight" class="w-full bg-gray-900 text-center rounded-lg py-1.5 text-sm border border-gray-800 focus:outline-none">
+                                                        <span class="text-xs text-gray-500">lbs</span>
+                                                    </div>
+                                                    <div class="flex-1 flex items-center gap-1">
+                                                        <input type="number" placeholder="Reps" x-model.number="exercise['set' + setNum].reps" class="w-full bg-gray-900 text-center rounded-lg py-1.5 text-sm border border-gray-800 focus:outline-none">
+                                                        <span class="text-xs text-gray-500">reps</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <button @click="finishWorkout()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-check"></i> Finish & Log Workout
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- VIEW C: VIEW PAST LOGGED WORKOUT -->
+                    <template x-if="activeLogViewDate">
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <button @click="activeLogViewDate = null" class="text-gray-400 hover:text-white text-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-arrow-left"></i> Back
+                                </button>
+                                <h2 class="font-bold text-xs" :class="textThemeClass" x-text="activeLogViewDate"></h2>
+                                <div class="w-12"></div>
+                            </div>
+
+                            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
+                                <h3 class="text-xl font-bold mb-1" x-text="activeLogData.splitName"></h3>
+                                <p class="text-xs text-gray-400 mb-4">Preset: <span class="text-gray-200" x-text="activeLogData.presetName"></span></p>
+
+                                <div class="space-y-4">
+                                    <template x-for="exercise in activeLogData.exercises" :key="exercise.name">
+                                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800/80">
+                                            <h4 class="font-semibold text-sm text-gray-200 mb-2" x-text="exercise.name"></h4>
+                                            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                                <template x-for="s in [1, 2, 3]">
+                                                    <div class="bg-gray-900 p-1.5 rounded-lg border border-gray-800">
+                                                        <p class="text-gray-500" x-text="'Set ' + s"></p>
+                                                        <p class="font-medium text-gray-200 mt-0.5"><span x-text="exercise['set'+s].weight || 0"></span> lbs</p>
+                                                        <p class="text-gray-400"><span x-text="exercise['set'+s].reps || 0"></span> reps</p>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- TAB 2: CALENDAR & HISTORY -->
+            <template x-if="activeTab === 'calendar'">
+                <div>
+                    <h2 class="text-xl font-bold mb-4">Workout History</h2>
+
+                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <button @click="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h3 class="font-bold text-base" x-text="monthNames[currentMonth] + ' ' + currentYear"></h3>
+                            <button @click="changeMonth(1)" class="p-2 text-gray-400 hover:text-white"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500 mb-2">
+                            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-1 text-center">
+                            <template x-for="day in calendarDays">
+                                <div>
+                                    <template x-if="day.dateStr">
+                                        <button @click="viewLogForDate(day.dateStr)" 
+                                            :class="{
+                                                [calendarHighlightClass]: day.hasWorkout,
+                                                'bg-gray-950 text-gray-300 hover:bg-gray-800': !day.hasWorkout
+                                            }"
+                                            class="w-full aspect-square rounded-xl text-sm flex flex-col items-center justify-center relative transition">
+                                            <span x-text="day.dayNum"></span>
+                                            <span x-show="day.hasWorkout" class="absolute bottom-1 w-1 h-1 bg-white rounded-full"></span>
+                                        </button>
+                                    </template>
+                                    <template x-if="!day.dateStr">
+                                        <div class="w-full aspect-square"></div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <template x-if="selectedCalendarDateLog">
+                        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                            <h4 class="text-xs uppercase font-semibold mb-1" :class="textThemeClass" x-text="selectedCalendarDateStr"></h4>
+                            <h3 class="text-lg font-bold mb-3" x-text="selectedCalendarDateLog.splitName"></h3>
+                            <button @click="jumpToLogView(selectedCalendarDateStr)" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium py-2 rounded-xl transition">
+                                View Full Exercise Breakdown
+                            </button>
+                        </div>
+                    </template>
+                    <template x-if="!selectedCalendarDateLog && selectedCalendarDateStr">
+                        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center text-gray-500 text-sm">
+                            No workout recorded on <span x-text="selectedCalendarDateStr"></span>.
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+        </main>
+
+        <!-- BOTTOM MOBILE NAVIGATION BAR -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex justify-around py-3 z-40">
+            <button @click="activeTab = 'splits'; activeLogViewDate = null; currentWorkoutSplit = null;" :class="activeTab === 'splits' ? textThemeClass : 'text-gray-500'" class="flex flex-col items-center flex-1 transition">
+                <i class="fa-solid fa-dumbbell text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Splits</span>
+            </button>
+            <button @click="activeTab = 'calendar'; activeLogViewDate = null; currentWorkoutSplit = null;" :class="activeTab === 'calendar' ? textThemeClass : 'text-gray-500'" class="flex flex-col items-center flex-1 transition">
+                <i class="fa-solid fa-calendar-days text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">History</span>
+            </button>
+        </nav>
+
+        <!-- MODAL: CREATE / EDIT SPLIT -->
+        <div x-show="openCreateSplitModal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+            <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl max-h-[85vh] overflow-y-auto">
+                <h3 class="text-lg font-bold mb-4" x-text="editingSplitId ? 'Edit Workout Split' : 'Create Workout Split'"></h3>
+
+                <div class="space-y-4 mb-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1">Preset Category Name</label>
+                        <input type="text" x-model="newSplitPreset" placeholder="e.g., Push / Pull / Legs" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1">Split Day Name</label>
+                        <input type="text" x-model="newSplitName" placeholder="e.g., Push Day A" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-semibold text-gray-400">Exercises</label>
+                            <button @click="newSplitExercises.push({ name: '', set1: {weight:'', reps:''}, set2: {weight:'', reps:''}, set3: {weight:'', reps:''} })" class="text-xs font-medium" :class="textThemeClass">+ Add Exercise</button>
+                        </div>
+
+                        <div class="space-y-2">
+                            <template x-for="(ex, idx) in newSplitExercises" :key="idx">
+                                <div class="flex gap-2 items-center">
+                                    <input type="text" x-model="ex.name" :placeholder="'Exercise ' + (idx + 1)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none">
+                                    <button @click="newSplitExercises.splice(idx, 1)" class="text-gray-500 hover:text-red-400 px-2"><i class="fa-solid fa-trash text-xs"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button @click="openCreateSplitModal = false" class="w-1/2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2.5 rounded-xl text-sm transition">Cancel</button>
+                    <button @click="saveSplit()" :class="btnThemeClass" class="w-1/2 text-white font-medium py-2.5 rounded-xl text-sm transition">Save Split</button>
+                </div>
+            </div>
         </div>
-        <div class="today-badge" id="today-date-display">Today</div>
-      </header>
 
-      <!-- WORKOUT TAB -->
-      <main id="workout-view" class="view-section workout-view active">
-        
-        <div class="card">
-          <div class="card-title">
-            <span>Routine Engine</span>
-            <button class="btn btn-secondary btn-sm" onclick="openAddDayModal()">+ Routine</button>
-          </div>
-          
-          <div class="form-group">
-            <label>Active Training Day</label>
-            <select id="day-select" onchange="changeDay(this.value)"></select>
-          </div>
+        <!-- MODAL: SETTINGS & CUSTOMIZATION -->
+        <div x-show="openSettingsModal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+            <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl">
+                <h3 class="text-lg font-bold mb-4">App Settings</h3>
 
-          <div class="metrics-grid" style="margin-top: 10px; margin-bottom: 0;">
-            <div class="metric-box">
-              <div class="metric-label">Volume Lifted</div>
-              <div class="metric-value" id="stat-total-volume" style="color: #60a5fa; font-size: 1.1rem;">0 <span style="font-size: 0.7rem; font-weight: 500;">lbs</span></div>
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-2">Accent Theme</label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button @click="setTheme('blue')" :class="theme === 'blue' ? 'border-white' : 'border-transparent'" class="bg-blue-600 h-10 rounded-xl border-2 transition"></button>
+                            <button @click="setTheme('emerald')" :class="theme === 'emerald' ? 'border-white' : 'border-transparent'" class="bg-emerald-600 h-10 rounded-xl border-2 transition"></button>
+                            <button @click="setTheme('purple')" :class="theme === 'purple' ? 'border-white' : 'border-transparent'" class="bg-purple-600 h-10 rounded-xl border-2 transition"></button>
+                            <button @click="setTheme('amber')" :class="theme === 'amber' ? 'border-white' : 'border-transparent'" class="bg-amber-600 h-10 rounded-xl border-2 transition"></button>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-800">
+                        <button @click="resetAllData()" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium py-2.5 rounded-xl transition">
+                            Reset All Data
+                        </button>
+                    </div>
+                </div>
+
+                <button @click="openSettingsModal = false" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 rounded-xl text-sm transition">Close</button>
             </div>
-            <div class="metric-box">
-              <div class="metric-label">Completion</div>
-              <div class="metric-value" id="stat-completion-rate" style="color: #34d399; font-size: 1.1rem;">0%</div>
-            </div>
-          </div>
         </div>
 
-        <div class="card">
-          <div class="card-title">
-            <span id="current-workout-title">Exercises</span>
-            <button class="btn btn-secondary btn-sm" onclick="openAddExerciseModal()">+ Exercise</button>
-          </div>
-
-          <div id="exercise-list-container"></div>
-
-          <div class="builder-row" style="margin-top: 12px; margin-bottom: 0;">
-            <button class="btn btn-workout" onclick="saveTodayWorkoutSession()" style="flex: 2; padding: 10px; font-size: 0.8rem;">Save Session</button>
-            <button class="btn btn-secondary" onclick="resetCurrentSession()" style="flex: 1; font-size: 0.75rem; padding: 10px;">Reset</button>
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom: 0;">
-          <div class="calendar-header">
-            <button class="calendar-nav-btn" onclick="changeMonth(-1)">&#10094;</button>
-            <span style="font-weight: 700; font-size: 0.85rem;" id="workout-calendar-title">Month Year</span>
-            <button class="calendar-nav-btn" onclick="changeMonth(1)">&#10095;</button>
-          </div>
-          <div class="calendar-grid" id="workout-calendar-grid"></div>
-        </div>
-      </main>
-
-      <!-- SOBER TAB -->
-      <main id="sober-view" class="view-section sober-view">
-        
-        <div class="card" style="text-align: center; padding: 16px 12px;">
-          <div class="metric-label">Streak Integrity Core</div>
-          <div class="metric-value" id="sober-days-count" style="font-size: 3rem; color: #34d399; margin: 2px 0; text-shadow: 0 0 15px rgba(52,211,153,0.2);">0</div>
-          <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;" id="sober-start-display">Clean since: --</p>
-          
-          <!-- Real-Time Counter Bar -->
-          <div class="realtime-grid">
-            <div class="rt-box">
-              <div class="rt-num" id="rt-days">0</div>
-              <div class="rt-lbl">Days</div>
-            </div>
-            <div class="rt-box">
-              <div class="rt-num" id="rt-hours">00</div>
-              <div class="rt-lbl">Hours</div>
-            </div>
-            <div class="rt-box">
-              <div class="rt-num" id="rt-mins">00</div>
-              <div class="rt-lbl">Mins</div>
-            </div>
-            <div class="rt-box">
-              <div class="rt-num" id="rt-secs">00</div>
-              <div class="rt-lbl">Secs</div>
-            </div>
-          </div>
-
-          <div class="metrics-grid" style="margin-bottom: 10px;">
-            <div class="metric-box">
-              <div class="metric-label">Best Streak</div>
-              <div class="metric-value" id="sober-best-streak" style="font-size: 1rem;">0d</div>
-            </div>
-            <div class="metric-box">
-              <div class="metric-label">Total Resets</div>
-              <div class="metric-value" id="sober-total-resets" style="font-size: 1rem; color: #f87171;">0</div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-secondary" onclick="openStartDateModal()" style="font-size: 0.75rem; padding: 9px;">Edit Anchor</button>
-            <button class="btn btn-danger" onclick="triggerReset()" style="font-size: 0.75rem; padding: 9px;">Log Reset</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Milestone Matrix</div>
-          <div class="metrics-grid" id="milestones-grid" style="margin-bottom: 0;"></div>
-        </div>
-
-        <div class="card" style="margin-bottom: 0;">
-          <div class="calendar-header">
-            <button class="calendar-nav-btn" onclick="changeMonth(-1)">&#10094;</button>
-            <span style="font-weight: 700; font-size: 0.85rem;" id="sober-calendar-title">Month Year</span>
-            <button class="calendar-nav-btn" onclick="changeMonth(1)">&#10095;</button>
-          </div>
-          <div class="calendar-grid" id="sober-calendar-grid"></div>
-        </div>
-      </main>
     </div>
 
-    <!-- NAVIGATION BAR -->
-    <nav class="bottom-nav">
-      <button class="nav-item active-workout" id="nav-workout" onclick="switchTab('workout')">
-        <svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 6.29 3.43 4.86 2 3.43 3.43 2 4.86 3.43 6.29 2 7.71 3.43 9.14 2 10.57 3.43 12 7 3.43 15.57 0 17 1.43 18.43 0 19.86 1.43 21.29 0 22.71 1.43 24.14 2.86 22.71 4.29 24.14 5.71 22.71 7.14 21.29 15.57 12.71 12 16.29 13.43 17.71 12 19.14 13.43 20.57z"/></svg>
-        Workouts
-      </button>
-      <button class="nav-item" id="nav-sober" onclick="switchTab('sober')">
-        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        Sober Engine
-      </button>
-    </nav>
-  </div>
+    <!-- APP SCRIPT -->
+    <script>
+        function workoutApp() {
+            return {
+                activeTab: 'splits',
+                splits: [],
+                workoutLogs: {},
+                streak: 0,
+                theme: 'blue',
+                
+                // Modals & States
+                openCreateSplitModal: false,
+                openSettingsModal: false,
+                editingSplitId: null,
+                newSplitPreset: '',
+                newSplitName: '',
+                newSplitExercises: [{ name: '', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} }],
+                
+                currentWorkoutSplit: null,
+                activeLogViewDate: null,
+                activeLogData: null,
 
-  <!-- MODALS -->
-  <div class="modal-overlay" id="modal-add-ex">
-    <div class="modal">
-      <div class="modal-header">
-        <span>Add Exercise Component</span>
-        <button class="close-btn" onclick="closeModal('modal-add-ex')">&times;</button>
-      </div>
-      <div class="form-group">
-        <label>Exercise Designation</label>
-        <input type="text" id="new-ex-name" placeholder="e.g. Incline Bench Press">
-      </div>
-      <div class="form-group">
-        <label>Target Sets Count</label>
-        <input type="number" id="new-ex-sets" value="3" min="1" max="10">
-      </div>
-      <button class="btn btn-workout" onclick="confirmAddExercise()" style="margin-top: 4px; padding: 10px; font-size: 0.8rem;">Append Exercise</button>
-    </div>
-  </div>
+                currentMonth: new Date().getMonth(),
+                currentYear: new Date().getFullYear(),
+                monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+                selectedCalendarDateStr: null,
+                selectedCalendarDateLog: null,
 
-  <div class="modal-overlay" id="modal-add-day">
-    <div class="modal">
-      <div class="modal-header">
-        <span>Create Custom Routine</span>
-        <button class="close-btn" onclick="closeModal('modal-add-day')">&times;</button>
-      </div>
-      <div class="form-group">
-        <label>Routine Identifier Name</label>
-        <input type="text" id="new-day-name" placeholder="e.g. Hypertrophy A">
-      </div>
-      <button class="btn btn-workout" onclick="confirmAddDay()" style="margin-top: 4px; padding: 10px; font-size: 0.8rem;">Initialize Routine</button>
-    </div>
-  </div>
+                init() {
+                    if (localStorage.getItem('ironlog_theme')) {
+                        this.theme = localStorage.getItem('ironlog_theme');
+                    }
+                    const savedSplits = localStorage.getItem('ironlog_splits');
+                    if (savedSplits) {
+                        this.splits = JSON.parse(savedSplits);
+                    } else {
+                        this.splits = [
+                            {
+                                id: 1,
+                                presetName: 'Push / Pull / Legs',
+                                name: 'Push Day',
+                                exercises: [
+                                    { name: 'Bench Press', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} },
+                                    { name: 'Overhead Press', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} }
+                                ]
+                            }
+                        ];
+                        this.saveSplits();
+                    }
 
-  <div class="modal-overlay" id="modal-sober-start">
-    <div class="modal">
-      <div class="modal-header">
-        <span>Configure Clean Baseline</span>
-        <button class="close-btn" onclick="closeModal('modal-sober-start')">&times;</button>
-      </div>
-      <div class="form-group">
-        <label>Anchor Date & Time</label>
-        <input type="datetime-local" id="input-sober-start">
-      </div>
-      <button class="btn btn-sober" onclick="saveSoberStartDate()" style="margin-top: 4px; padding: 10px; font-size: 0.8rem;">Commit Anchor</button>
-    </div>
-  </div>
+                    const savedLogs = localStorage.getItem('ironlog_logs');
+                    if (savedLogs) this.workoutLogs = JSON.parse(savedLogs);
 
-  <div class="modal-overlay" id="modal-history">
-    <div class="modal">
-      <div class="modal-header">
-        <span id="history-date-title">Session Log</span>
-        <button class="close-btn" onclick="closeModal('modal-history')">&times;</button>
-      </div>
-      <div id="history-content" style="font-size: 0.8rem; line-height: 1.5; margin-bottom: 14px; color: #cbd5e1;"></div>
-      <button class="btn btn-danger" id="btn-delete-history" style="padding: 10px; font-size: 0.8rem;">Purge Log Entry</button>
-    </div>
-  </div>
+                    this.calculateStreak();
+                },
 
-  <script>
-    const DEFAULT_ROUTINES = {
-      "Push Power": [
-        { id: "e1", name: "Barbell Bench Press", sets: 4 },
-        { id: "e2", name: "Seated Overhead Press", sets: 3 },
-        { id: "e3", name: "Weighted Dips", sets: 3 }
-      ],
-      "Pull Hypertrophy": [
-        { id: "e4", name: "Conventional Deadlift", sets: 3 },
-        { id: "e5", name: "Chest-Supported Row", sets: 4 },
-        { id: "e6", name: "EZ-Bar Preacher Curl", sets: 3 }
-      ],
-      "Lower Structural": [
-        { id: "e7", name: "Low-Bar Back Squat", sets: 4 },
-        { id: "e8", name: "Romanian Deadlift", sets: 3 },
-        { id: "e9", name: "Standing Calf Raises", sets: 4 }
-      ]
-    };
+                setTheme(t) {
+                    this.theme = t;
+                    localStorage.setItem('ironlog_theme', t);
+                },
 
-    const STATE = {
-      activeTab: 'workout',
-      today: new Date(),
-      currentCalDate: new Date(),
-      routines: {},
-      activeDayKey: 'Push Power',
-      workoutLogs: {},
-      soberData: { startDate: null, resets: [] },
-      sessionState: {} 
-    };
+                get btnThemeClass() {
+                    return {
+                        'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30': this.theme === 'blue',
+                        'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30': this.theme === 'emerald',
+                        'bg-purple-600 hover:bg-purple-500 shadow-purple-600/30': this.theme === 'purple',
+                        'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30': this.theme === 'amber'
+                    };
+                },
 
-    const MILESTONES = [7, 30, 90, 180, 365];
+                get textThemeClass() {
+                    return {
+                        'text-blue-400': this.theme === 'blue',
+                        'text-emerald-400': this.theme === 'emerald',
+                        'text-purple-400': this.theme === 'purple',
+                        'text-amber-400': this.theme === 'amber'
+                    };
+                },
 
-    function formatDateKey(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    }
+                get badgeThemeClass() {
+                    return {
+                        'text-blue-400 bg-blue-950': this.theme === 'blue',
+                        'text-emerald-400 bg-emerald-950': this.theme === 'emerald',
+                        'text-purple-400 bg-purple-950': this.theme === 'purple',
+                        'text-amber-400 bg-amber-950': this.theme === 'amber'
+                    };
+                },
 
-    function parseDateKey(keyStr) {
-      const [y, m, d] = keyStr.split('-').map(Number);
-      return new Date(y, m - 1, d);
-    }
+                get calendarHighlightClass() {
+                    return {
+                        'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30': this.theme === 'blue',
+                        'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/30': this.theme === 'emerald',
+                        'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/30': this.theme === 'purple',
+                        'bg-amber-600 text-white font-bold shadow-md shadow-amber-600/30': this.theme === 'amber'
+                    };
+                },
 
-    function loadStorage() {
-      const saved = localStorage.getItem('pulse_engine_v5');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        STATE.routines = parsed.routines || DEFAULT_ROUTINES;
-        STATE.activeDayKey = parsed.activeDay || Object.keys(STATE.routines)[0];
-        STATE.workoutLogs = parsed.logs || {};
-      } else {
-        STATE.routines = JSON.parse(JSON.stringify(DEFAULT_ROUTINES));
-        STATE.activeDayKey = Object.keys(STATE.routines)[0];
-      }
+                saveSplits() {
+                    localStorage.setItem('ironlog_splits', JSON.stringify(this.splits));
+                },
 
-      const savedSober = localStorage.getItem('sober_engine_v5');
-      if (savedSober) {
-        STATE.soberData = JSON.parse(savedSober);
-      } else {
-        const defaultStart = new Date();
-        defaultStart.setDate(defaultStart.getDate() - 21);
-        STATE.soberData.startDate = defaultStart.toISOString();
-        STATE.soberData.resets = [];
-      }
-    }
+                openCreateModal() {
+                    this.editingSplitId = null;
+                    this.newSplitName = '';
+                    this.newSplitPreset = '';
+                    this.newSplitExercises = [{ name: '', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} }];
+                    this.openCreateSplitModal = true;
+                },
 
-    function saveStorage() {
-      localStorage.setItem('pulse_engine_v5', JSON.stringify({
-        routines: STATE.routines,
-        activeDay: STATE.activeDayKey,
-        logs: STATE.workoutLogs
-      }));
-    }
+                editSplit(split) {
+                    this.editingSplitId = split.id;
+                    this.newSplitName = split.name;
+                    this.newSplitPreset = split.presetName;
+                    this.newSplitExercises = JSON.parse(JSON.stringify(split.exercises));
+                    this.openCreateSplitModal = true;
+                },
 
-    function saveSoberStorage() {
-      localStorage.setItem('sober_engine_v5', JSON.stringify(STATE.soberData));
-    }
+                saveSplit() {
+                    if (!this.newSplitName || this.newSplitExercises.length === 0) {
+                        alert('Please fill out the split name and add at least one exercise.');
+                        return;
+                    }
 
-    function init() {
-      loadStorage();
-      if (!STATE.routines[STATE.activeDayKey]) {
-        STATE.activeDayKey = Object.keys(STATE.routines)[0] || 'Routine';
-      }
-      
-      const opts = { weekday: 'short', month: 'short', day: 'numeric' };
-      document.getElementById('today-date-display').textContent = STATE.today.toLocaleDateString(undefined, opts);
+                    const cleanExercises = this.newSplitExercises.filter(e => e.name.trim() !== '').map(e => ({
+                        name: e.name,
+                        set1: e.set1 || { weight: '', reps: '' },
+                        set2: e.set2 || { weight: '', reps: '' },
+                        set3: e.set3 || { weight: '', reps: '' }
+                    }));
 
-      populateDayDropdown();
-      renderAll();
-      setInterval(updateRealtimeCounter, 1000);
-    }
+                    if (this.editingSplitId) {
+                        const index = this.splits.findIndex(s => s.id === this.editingSplitId);
+                        if (index !== -1) {
+                            this.splits[index] = {
+                                id: this.editingSplitId,
+                                presetName: this.newSplitPreset || 'General Preset',
+                                name: this.newSplitName,
+                                exercises: cleanExercises
+                            };
+                        }
+                    } else {
+                        const newSplit = {
+                            id: Date.now(),
+                            presetName: this.newSplitPreset || 'General Preset',
+                            name: this.newSplitName,
+                            exercises: cleanExercises
+                        };
+                        this.splits.push(newSplit);
+                    }
 
-    function switchTab(tab) {
-      STATE.activeTab = tab;
-      document.getElementById('workout-view').classList.toggle('active', tab === 'workout');
-      document.getElementById('sober-view').classList.toggle('active', tab === 'sober');
-      document.getElementById('nav-workout').className = `nav-item ${tab === 'workout' ? 'active-workout' : ''}`;
-      document.getElementById('nav-sober').className = `nav-item ${tab === 'sober' ? 'active-sober' : ''}`;
-      document.getElementById('app-heading').textContent = tab === 'workout' ? 'Workout Engine' : 'Sober Tracker';
-      renderAll();
-    }
+                    this.saveSplits();
+                    this.openCreateSplitModal = false;
+                },
 
-    function renderAll() {
-      if (STATE.activeTab === 'workout') renderWorkoutView();
-      else renderSoberView();
-      renderCalendar();
-    }
+                deleteSplit(id) {
+                    if (confirm('Are you sure you want to delete this split?')) {
+                        this.splits = this.splits.filter(s => s.id !== id);
+                        this.saveSplits();
+                    }
+                },
 
-    function populateDayDropdown() {
-      const select = document.getElementById('day-select');
-      select.innerHTML = '';
-      Object.keys(STATE.routines).forEach(dayName => {
-        const opt = document.createElement('option');
-        opt.value = dayName;
-        opt.textContent = dayName;
-        if (dayName === STATE.activeDayKey) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
+                startWorkout(split) {
+                    this.currentWorkoutSplit = JSON.parse(JSON.stringify(split));
+                },
 
-    function changeDay(dayName) {
-      STATE.activeDayKey = dayName;
-      saveStorage();
-      renderWorkoutView();
-    }
+                finishWorkout() {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    this.workoutLogs[todayStr] = {
+                        splitName: this.currentWorkoutSplit.name,
+                        presetName: this.currentWorkoutSplit.presetName,
+                        exercises: this.currentWorkoutSplit.exercises
+                    };
+                    localStorage.setItem('ironlog_logs', JSON.stringify(this.workoutLogs));
+                    this.calculateStreak();
+                    this.currentWorkoutSplit = null;
+                    alert('Workout logged successfully!');
+                },
 
-    function openAddDayModal() {
-      document.getElementById('new-day-name').value = '';
-      document.getElementById('modal-add-day').classList.add('active');
-    }
+                get calendarDays() {
+                    const firstDayIndex = new Date(this.currentYear, this.currentMonth, 1).getDay();
+                    const totalDays = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+                    let days = [];
+                    for (let i = 0; i < firstDayIndex; i++) {
+                        days.push({ dayNum: '', dateStr: null, hasWorkout: false });
+                    }
+                    for (let d = 1; d <= totalDays; d++) {
+                        const formattedMonth = String(this.currentMonth + 1).padStart(2, '0');
+                        const formattedDay = String(d).padStart(2, '0');
+                        const dateStr = `${this.currentYear}-${formattedMonth}-${formattedDay}`;
+                        days.push({
+                            dayNum: d,
+                            dateStr: dateStr,
+                            hasWorkout: !!this.workoutLogs[dateStr]
+                        });
+                    }
+                    return days;
+                },
 
-    function confirmAddDay() {
-      const name = document.getElementById('new-day-name').value.trim();
-      if (!name || STATE.routines[name]) return;
-      STATE.routines[name] = [];
-      STATE.activeDayKey = name;
-      saveStorage();
-      closeModal('modal-add-day');
-      populateDayDropdown();
-      renderWorkoutView();
-    }
+                changeMonth(direction) {
+                    this.currentMonth += direction;
+                    if (this.currentMonth > 11) { this.currentMonth = 0; this.currentYear++; }
+                    else if (this.currentMonth < 0) { this.currentMonth = 11; this.currentYear--; }
+                },
 
-    function openAddExerciseModal() {
-      document.getElementById('new-ex-name').value = '';
-      document.getElementById('new-ex-sets').value = 3;
-      document.getElementById('modal-add-ex').classList.add('active');
-    }
+                viewLogForDate(dateStr) {
+                    this.selectedCalendarDateStr = dateStr;
+                    this.selectedCalendarDateLog = this.workoutLogs[dateStr] || null;
+                },
 
-    function confirmAddExercise() {
-      const name = document.getElementById('new-ex-name').value.trim();
-      const sets = parseInt(document.getElementById('new-ex-sets').value) || 3;
-      if (!name) return;
+                jumpToLogView(dateStr) {
+                    this.activeLogData = this.workoutLogs[dateStr];
+                    this.activeLogViewDate = dateStr;
+                    this.activeTab = 'splits';
+                },
 
-      if (!STATE.routines[STATE.activeDayKey]) {
-        STATE.routines[STATE.activeDayKey] = [];
-      }
+                calculateStreak() {
+                    let currentStreak = 0;
+                    let checkDate = new Date();
+                    const formatDate = (d) => {
+                        let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
+                        if (month.length < 2) month = '0' + month;
+                        if (day.length < 2) day = '0' + day;
+                        return [year, month, day].join('-');
+                    };
+                    let todayStr = formatDate(checkDate);
+                    if (!this.workoutLogs[todayStr]) {
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        todayStr = formatDate(checkDate);
+                        if (!this.workoutLogs[todayStr]) { this.streak = 0; return; }
+                    }
+                    while (true) {
+                        let dateStr = formatDate(checkDate);
+                        if (this.workoutLogs[dateStr]) {
+                            currentStreak++;
+                            checkDate.setDate(checkDate.getDate() - 1);
+                        } else { break; }
+                    }
+                    this.streak = currentStreak;
+                },
 
-      STATE.routines[STATE.activeDayKey].push({
-        id: 'ex_' + Date.now(),
-        name,
-        sets
-      });
-
-      saveStorage();
-      closeModal('modal-add-ex');
-      renderWorkoutView();
-    }
-
-    function removeExercise(exId) {
-      STATE.routines[STATE.activeDayKey] = STATE.routines[STATE.activeDayKey].filter(e => e.id !== exId);
-      saveStorage();
-      renderWorkoutView();
-    }
-
-    function renderWorkoutView() {
-      document.getElementById('current-workout-title').textContent = STATE.activeDayKey;
-      const container = document.getElementById('exercise-list-container');
-      container.innerHTML = '';
-
-      const exercises = STATE.routines[STATE.activeDayKey] || [];
-      let totalSets = 0;
-      let completedSets = 0;
-      let totalVolume = 0;
-
-      if (exercises.length === 0) {
-        container.innerHTML = `<p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 12px;">No components configured. Add exercises above.</p>`;
-        document.getElementById('stat-completion-rate').textContent = '0%';
-        document.getElementById('stat-total-volume').innerHTML = `0 <span style="font-size: 0.7rem; font-weight: 500;">lbs</span>`;
-        return;
-      }
-
-      exercises.forEach((ex) => {
-        let setsHTML = `
-          <div class="set-grid-header">
-            <div>Set</div>
-            <div>Weight</div>
-            <div>Reps</div>
-            <div style="text-align:center;">Done</div>
-            <div></div>
-          </div>
-        `;
-
-        for (let s = 1; s <= ex.sets; s++) {
-          totalSets++;
-          const stateKey = `${STATE.activeDayKey}_${ex.id}_s${s}`;
-          const isDone = STATE.sessionState[stateKey]?.done || false;
-          const weight = STATE.sessionState[stateKey]?.weight || '';
-          const reps = STATE.sessionState[stateKey]?.reps || '';
-
-          if (isDone) {
-            completedSets++;
-            const wNum = parseFloat(weight) || 0;
-            const rNum = parseFloat(reps) || 0;
-            totalVolume += (wNum * rNum);
-          }
-
-          setsHTML += `
-            <div class="set-row">
-              <div class="set-num">S${s}</div>
-              <input type="number" placeholder="0" value="${weight}" oninput="updateSetInput('${stateKey}', 'weight', this.value)" style="padding: 5px; font-size: 0.75rem;">
-              <input type="number" placeholder="0" value="${reps}" oninput="updateSetInput('${stateKey}', 'reps', this.value)" style="padding: 5px; font-size: 0.75rem;">
-              <div class="set-check ${isDone ? 'completed' : ''}" onclick="toggleSet('${stateKey}')">
-                ${isDone ? '✓' : ''}
-              </div>
-              <button class="icon-btn" onclick="removeExercise('${ex.id}')" title="Remove">&times;</button>
-            </div>
-          `;
-        }
-
-        const exCard = document.createElement('div');
-        exCard.className = 'exercise-card';
-        exCard.innerHTML = `
-          <div class="exercise-header">
-            <span class="exercise-name">${ex.name}</span>
-            <span style="font-size: 0.65rem; color: var(--text-muted); font-weight: 700;">${ex.sets} SETS</span>
-          </div>
-          ${setsHTML}
-        `;
-        container.appendChild(exCard);
-      });
-
-      const rate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
-      document.getElementById('stat-completion-rate').textContent = `${rate}%`;
-      document.getElementById('stat-total-volume').innerHTML = `${totalVolume.toLocaleString()} <span style="font-size: 0.7rem; font-weight: 500;">lbs</span>`;
-    }
-
-    function updateSetInput(key, field, val) {
-      if (!STATE.sessionState[key]) STATE.sessionState[key] = { done: false, weight: '', reps: '' };
-      STATE.sessionState[key][field] = val;
-    }
-
-    function toggleSet(key) {
-      if (!STATE.sessionState[key]) STATE.sessionState[key] = { done: false, weight: '', reps: '' };
-      STATE.sessionState[key].done = !STATE.sessionState[key].done;
-      renderWorkoutView();
-    }
-
-    function resetCurrentSession() {
-      if (confirm("Clear current session metrics?")) {
-        STATE.sessionState = {};
-        renderWorkoutView();
-      }
-    }
-
-    function saveTodayWorkoutSession() {
-      const exercises = STATE.routines[STATE.activeDayKey] || [];
-      if (exercises.length === 0) return;
-
-      const todayKey = formatDateKey(STATE.today);
-      let sessionVol = 0;
-      
-      const loggedExercises = exercises.map(ex => {
-        let setDetails = [];
-        for (let s = 1; s <= ex.sets; s++) {
-          const k = `${STATE.activeDayKey}_${ex.id}_s${s}`;
-          const dat = STATE.sessionState[k];
-          if (dat && dat.done) {
-            const w = parseFloat(dat.weight) || 0;
-            const r = parseFloat(dat.reps) || 0;
-            sessionVol += (w * r);
-            setDetails.push({ setNum: s, weight: w, reps: r });
-          }
-        }
-        return { name: ex.name, sets: setDetails };
-      });
-
-      STATE.workoutLogs[todayKey] = {
-        dayName: STATE.activeDayKey,
-        volume: sessionVol,
-        exercises: loggedExercises
-      };
-
-      saveStorage();
-      renderCalendar();
-      alert('Workout session successfully locked and recorded.');
-    }
-
-    function updateRealtimeCounter() {
-      if (!STATE.soberData.startDate) return;
-      const start = new Date(STATE.soberData.startDate);
-      const now = new Date();
-      const diffMs = now - start;
-      if (diffMs < 0) return;
-
-      const totalSecs = Math.floor(diffMs / 1000);
-      const days = Math.floor(totalSecs / (3600 * 24));
-      const hours = Math.floor((totalSecs % (3600 * 24)) / 3600);
-      const mins = Math.floor((totalSecs % 3600) / 60);
-      const secs = totalSecs % 60;
-
-      document.getElementById('sober-days-count').textContent = days;
-      document.getElementById('rt-days').textContent = days;
-      document.getElementById('rt-hours').textContent = String(hours).padStart(2, '0');
-      document.getElementById('rt-mins').textContent = String(mins).padStart(2, '0');
-      document.getElementById('rt-secs').textContent = String(secs).padStart(2, '0');
-    }
-
-    function renderSoberView() {
-      if (!STATE.soberData.startDate) return;
-      const start = new Date(STATE.soberData.startDate);
-      const now = new Date();
-      const currentDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-      const safeDays = currentDays >= 0 ? currentDays : 0;
-
-      document.getElementById('sober-start-display').textContent = `Clean since: ${start.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} ${start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-
-      document.getElementById('sober-total-resets').textContent = STATE.soberData.resets.length;
-      document.getElementById('sober-best-streak').textContent = `${Math.max(safeDays, ...MILESTONES.map(m => safeDays >= m ? m : 0))}d`;
-
-      const grid = document.getElementById('milestones-grid');
-      grid.innerHTML = '';
-      MILESTONES.forEach(ms => {
-        const achieved = safeDays >= ms;
-        const box = document.createElement('div');
-        box.className = 'metric-box';
-        box.style.borderColor = achieved ? '#059669' : 'var(--card-border)';
-        box.style.background = achieved ? 'rgba(5, 150, 105, 0.08)' : 'rgba(3, 6, 12, 0.4)';
-        box.innerHTML = `
-          <div class="metric-label">${ms}d Target</div>
-          <div class="metric-value" style="font-size: 0.95rem; color: ${achieved ? '#34d399' : 'var(--text-muted)'};">${achieved ? 'UNLOCKED' : (ms - safeDays) + 'd left'}</div>
-        `;
-        grid.appendChild(box);
-      });
-    }
-
-    function openStartDateModal() {
-      const dt = STATE.soberData.startDate ? new Date(STATE.soberData.startDate) : new Date();
-      // Format to YYYY-MM-DDThh:mm for datetime-local input
-      const pad = n => String(n).padStart(2, '0');
-      const localStr = `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
-      document.getElementById('input-sober-start').value = localStr;
-      document.getElementById('modal-sober-start').classList.add('active');
-    }
-
-    function saveSoberStartDate() {
-      const val = document.getElementById('input-sober-start').value;
-      if (val) {
-        STATE.soberData.startDate = new Date(val).toISOString();
-        saveSoberStorage();
-        closeModal('modal-sober-start');
-        renderAll();
-      }
-    }
-
-    function triggerReset() {
-      if (confirm("Log a streak reset event right now?")) {
-        const now = new Date();
-        STATE.soberData.resets.push(formatDateKey(now));
-        STATE.soberData.startDate = now.toISOString();
-        saveSoberStorage();
-        renderAll();
-      }
-    }
-
-    function changeMonth(delta) {
-      STATE.currentCalDate.setMonth(STATE.currentCalDate.getMonth() + delta);
-      renderCalendar();
-    }
-
-    function renderCalendar() {
-      const year = STATE.currentCalDate.getFullYear();
-      const month = STATE.currentCalDate.getMonth();
-      const monthName = STATE.currentCalDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-      
-      const isWorkout = STATE.activeTab === 'workout';
-      document.getElementById(isWorkout ? 'workout-calendar-title' : 'sober-calendar-title').textContent = monthName;
-      
-      const grid = document.getElementById(isWorkout ? 'workout-calendar-grid' : 'sober-calendar-grid');
-      grid.innerHTML = '';
-
-      ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(d => {
-        const el = document.createElement('div');
-        el.className = 'day-name';
-        el.textContent = d;
-        grid.appendChild(el);
-      });
-
-      let firstDay = new Date(year, month, 1).getDay();
-      firstDay = firstDay === 0 ? 6 : firstDay - 1;
-      const totalDays = new Date(year, month + 1, 0).getDate();
-
-      for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement('div');
-        empty.className = 'calendar-day empty';
-        grid.appendChild(empty);
-      }
-
-      const todayKey = formatDateKey(STATE.today);
-
-      for (let day = 1; day <= totalDays; day++) {
-        const dateObj = new Date(year, month, day);
-        const dateKey = formatDateKey(dateObj);
-        const dayEl = document.createElement('div');
-        dayEl.className = 'calendar-day';
-        dayEl.textContent = day;
-
-        if (dateKey === todayKey) dayEl.classList.add('today');
-
-        if (isWorkout) {
-          if (STATE.workoutLogs[dateKey]) {
-            dayEl.classList.add('logged');
-            dayEl.onclick = () => showWorkoutHistory(dateKey);
-          }
-        } else {
-          if (STATE.soberData.resets.includes(dateKey)) {
-            dayEl.classList.add('reset');
-          } else if (STATE.soberData.startDate) {
-            const startDateKey = formatDateKey(new Date(STATE.soberData.startDate));
-            if (dateKey >= startDateKey && dateKey <= todayKey) {
-              dayEl.classList.add('clean');
+                resetAllData() {
+                    if (confirm('Are you sure? This erases all data permanently.')) {
+                        localStorage.clear();
+                        location.reload();
+                    }
+                }
             }
-          }
         }
-        grid.appendChild(dayEl);
-      }
-    }
-
-    function showWorkoutHistory(dateKey) {
-      const data = STATE.workoutLogs[dateKey];
-      if (!data) return;
-      document.getElementById('history-date-title').textContent = `${data.dayName} (${dateKey})`;
-      
-      let html = `<p style="margin-bottom: 6px; color: #38bdf8; font-weight:700;">Total Volume: ${data.volume.toLocaleString()} lbs</p>`;
-      data.exercises.forEach(ex => {
-        if (ex.sets.length > 0) {
-          const setsStr = ex.sets.map(s => `S${s.setNum}: ${s.weight}lbs × ${s.reps}r`).join(' | ');
-          html += `<div style="margin-bottom: 4px;"><strong style="color:#fff;">${ex.name}</strong><br/><span style="font-size:0.7rem; color:var(--text-muted);">${setsStr}</span></div>`;
-        }
-      });
-
-      document.getElementById('history-content').innerHTML = html;
-      
-      const delBtn = document.getElementById('btn-delete-history');
-      delBtn.style.display = 'block';
-      delBtn.onclick = () => {
-        delete STATE.workoutLogs[dateKey];
-        saveStorage();
-        closeModal('modal-history');
-        renderAll();
-      };
-      document.getElementById('modal-history').classList.add('active');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
+    </script>
 </body>
 </html>
