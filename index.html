@@ -1,557 +1,877 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IronLog Workout Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowUp 90 - Command Center</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { -webkit-tap-highlight-color: transparent; }
-        /* Custom scrollbar for inner containers */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-    </style>
-</head>
-<body class="bg-gray-950 text-gray-100 font-sans antialiased select-none flex items-center justify-center min-h-screen p-0 sm:p-4" x-data="workoutApp()">
-
-    <!-- 9:16 ASPECT RATIO MOBILE SHELL CONTAINER -->
-    <div class="w-full sm:max-w-[400px] sm:h-[844px] h-screen bg-gray-950 sm:border-[8px] sm:border-gray-800 sm:rounded-[40px] flex flex-col relative overflow-hidden shadow-2xl">
-
-        <!-- TOP HEADER -->
-        <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-40 px-4 py-3 flex justify-between items-center shrink-0">
-            <div class="flex items-center space-x-2">
-                <div :class="{'bg-blue-600': theme==='blue', 'bg-emerald-600': theme==='emerald', 'bg-purple-600': theme==='purple', 'bg-amber-600': theme==='amber'}" class="text-white p-2 rounded-xl font-bold flex items-center justify-center w-9 h-9 transition-colors">
-                    <i class="fa-solid fa-dumbbell text-sm"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">IronLog</h1>
-                    <p class="text-xs text-gray-400">Streak: <span class="text-orange-400 font-semibold" x-text="streak"></span> Days 🔥</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button @click="openSettingsModal = true" class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-gear"></i></button>
-            </div>
-        </header>
-
-        <!-- SCROLLABLE CONTENT VIEWPORT -->
-        <main class="flex-1 overflow-y-auto p-4 pb-24">
-
-            <!-- TAB 1: WORKOUT SPLITS & ACTIVE WORKOUT -->
-            <template x-if="activeTab === 'splits'">
-                <div>
-                    <!-- VIEW A: SPLIT LIST -->
-                    <template x-if="!currentWorkoutSplit && !activeLogViewDate">
-                        <div>
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-xl font-bold">Your Splits</h2>
-                                <button @click="openCreateModal()" :class="btnThemeClass" class="text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg flex items-center gap-1.5 transition">
-                                    <i class="fa-solid fa-plus text-xs"></i> New Split
-                                </button>
-                            </div>
-
-                            <div class="space-y-3">
-                                <template x-for="split in splits" :key="split.id">
-                                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-sm">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <div>
-                                                <span class="text-xs uppercase tracking-wider font-semibold px-2 py-0.5 rounded" :class="badgeThemeClass" x-text="split.presetName"></span>
-                                                <h3 class="text-lg font-bold mt-1" x-text="split.name"></h3>
-                                            </div>
-                                            <div class="flex gap-1">
-                                                <button @click="editSplit(split)" class="text-gray-500 hover:text-gray-200 p-1.5"><i class="fa-solid fa-pen text-xs"></i></button>
-                                                <button @click="deleteSplit(split.id)" class="text-gray-500 hover:text-red-400 p-1.5"><i class="fa-solid fa-trash text-xs"></i></button>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="text-sm text-gray-400 mb-4">
-                                            <p><span class="font-medium text-gray-200" x-text="split.exercises.length"></span> Exercises configured</p>
-                                        </div>
-
-                                        <button @click="startWorkout(split)" :class="btnThemeClass" class="w-full text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md">
-                                            <i class="fa-solid fa-play text-xs"></i> Start Workout
-                                        </button>
-                                    </div>
-                                </template>
-
-                                <template x-if="splits.length === 0">
-                                    <div class="text-center py-12 text-gray-500">
-                                        <i class="fa-solid fa-clipboard-list text-4xl mb-3"></i>
-                                        <p>No splits created yet. Create one to begin!</p>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- VIEW B: ACTIVE WORKOUT SESSION -->
-                    <template x-if="currentWorkoutSplit">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <button @click="currentWorkoutSplit = null" class="text-gray-400 hover:text-white text-sm flex items-center gap-1">
-                                    <i class="fa-solid fa-arrow-left"></i> Cancel
-                                </button>
-                                <h2 class="font-bold text-sm text-center" :class="textThemeClass" x-text="currentWorkoutSplit.name"></h2>
-                                <div class="w-12"></div>
-                            </div>
-
-                            <div class="space-y-4 mb-6">
-                                <template x-for="(exercise, index) in currentWorkoutSplit.exercises" :key="index">
-                                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="font-bold text-base text-gray-100" x-text="exercise.name"></h4>
-                                            <span class="text-xs text-gray-500">3 Sets</span>
-                                        </div>
-
-                                        <div class="space-y-2">
-                                            <template x-for="setNum in [1, 2, 3]" :key="setNum">
-                                                <div class="flex items-center gap-2 bg-gray-950 p-2 rounded-xl border border-gray-800/60">
-                                                    <span class="text-xs font-bold text-gray-400 w-12" x-text="'Set ' + setNum"></span>
-                                                    <div class="flex-1 flex items-center gap-1">
-                                                        <input type="number" placeholder="Wt" x-model.number="exercise['set' + setNum].weight" class="w-full bg-gray-900 text-center rounded-lg py-1.5 text-sm border border-gray-800 focus:outline-none">
-                                                        <span class="text-xs text-gray-500">lbs</span>
-                                                    </div>
-                                                    <div class="flex-1 flex items-center gap-1">
-                                                        <input type="number" placeholder="Reps" x-model.number="exercise['set' + setNum].reps" class="w-full bg-gray-900 text-center rounded-lg py-1.5 text-sm border border-gray-800 focus:outline-none">
-                                                        <span class="text-xs text-gray-500">reps</span>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <button @click="finishWorkout()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-check"></i> Finish & Log Workout
-                            </button>
-                        </div>
-                    </template>
-
-                    <!-- VIEW C: VIEW PAST LOGGED WORKOUT -->
-                    <template x-if="activeLogViewDate">
-                        <div>
-                            <div class="flex items-center justify-between mb-4">
-                                <button @click="activeLogViewDate = null" class="text-gray-400 hover:text-white text-sm flex items-center gap-1">
-                                    <i class="fa-solid fa-arrow-left"></i> Back
-                                </button>
-                                <h2 class="font-bold text-xs" :class="textThemeClass" x-text="activeLogViewDate"></h2>
-                                <div class="w-12"></div>
-                            </div>
-
-                            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
-                                <h3 class="text-xl font-bold mb-1" x-text="activeLogData.splitName"></h3>
-                                <p class="text-xs text-gray-400 mb-4">Preset: <span class="text-gray-200" x-text="activeLogData.presetName"></span></p>
-
-                                <div class="space-y-4">
-                                    <template x-for="exercise in activeLogData.exercises" :key="exercise.name">
-                                        <div class="bg-gray-950 p-3 rounded-xl border border-gray-800/80">
-                                            <h4 class="font-semibold text-sm text-gray-200 mb-2" x-text="exercise.name"></h4>
-                                            <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                                                <template x-for="s in [1, 2, 3]">
-                                                    <div class="bg-gray-900 p-1.5 rounded-lg border border-gray-800">
-                                                        <p class="text-gray-500" x-text="'Set ' + s"></p>
-                                                        <p class="font-medium text-gray-200 mt-0.5"><span x-text="exercise['set'+s].weight || 0"></span> lbs</p>
-                                                        <p class="text-gray-400"><span x-text="exercise['set'+s].reps || 0"></span> reps</p>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </template>
-
-            <!-- TAB 2: CALENDAR & HISTORY -->
-            <template x-if="activeTab === 'calendar'">
-                <div>
-                    <h2 class="text-xl font-bold mb-4">Workout History</h2>
-
-                    <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <button @click="changeMonth(-1)" class="p-2 text-gray-400 hover:text-white"><i class="fa-solid fa-chevron-left"></i></button>
-                            <h3 class="font-bold text-base" x-text="monthNames[currentMonth] + ' ' + currentYear"></h3>
-                            <button @click="changeMonth(1)" class="p-2 text-gray-400 hover:text-white"><i class="fa-solid fa-chevron-right"></i></button>
-                        </div>
-
-                        <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500 mb-2">
-                            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-                        </div>
-
-                        <div class="grid grid-cols-7 gap-1 text-center">
-                            <template x-for="day in calendarDays">
-                                <div>
-                                    <template x-if="day.dateStr">
-                                        <button @click="viewLogForDate(day.dateStr)" 
-                                            :class="{
-                                                [calendarHighlightClass]: day.hasWorkout,
-                                                'bg-gray-950 text-gray-300 hover:bg-gray-800': !day.hasWorkout
-                                            }"
-                                            class="w-full aspect-square rounded-xl text-sm flex flex-col items-center justify-center relative transition">
-                                            <span x-text="day.dayNum"></span>
-                                            <span x-show="day.hasWorkout" class="absolute bottom-1 w-1 h-1 bg-white rounded-full"></span>
-                                        </button>
-                                    </template>
-                                    <template x-if="!day.dateStr">
-                                        <div class="w-full aspect-square"></div>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <template x-if="selectedCalendarDateLog">
-                        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                            <h4 class="text-xs uppercase font-semibold mb-1" :class="textThemeClass" x-text="selectedCalendarDateStr"></h4>
-                            <h3 class="text-lg font-bold mb-3" x-text="selectedCalendarDateLog.splitName"></h3>
-                            <button @click="jumpToLogView(selectedCalendarDateStr)" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium py-2 rounded-xl transition">
-                                View Full Exercise Breakdown
-                            </button>
-                        </div>
-                    </template>
-                    <template x-if="!selectedCalendarDateLog && selectedCalendarDateStr">
-                        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center text-gray-500 text-sm">
-                            No workout recorded on <span x-text="selectedCalendarDateStr"></span>.
-                        </div>
-                    </template>
-                </div>
-            </template>
-
-        </main>
-
-        <!-- BOTTOM MOBILE NAVIGATION BAR -->
-        <nav class="absolute bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 flex justify-around py-3 z-40">
-            <button @click="activeTab = 'splits'; activeLogViewDate = null; currentWorkoutSplit = null;" :class="activeTab === 'splits' ? textThemeClass : 'text-gray-500'" class="flex flex-col items-center flex-1 transition">
-                <i class="fa-solid fa-dumbbell text-lg mb-0.5"></i>
-                <span class="text-[10px] font-medium">Splits</span>
-            </button>
-            <button @click="activeTab = 'calendar'; activeLogViewDate = null; currentWorkoutSplit = null;" :class="activeTab === 'calendar' ? textThemeClass : 'text-gray-500'" class="flex flex-col items-center flex-1 transition">
-                <i class="fa-solid fa-calendar-days text-lg mb-0.5"></i>
-                <span class="text-[10px] font-medium">History</span>
-            </button>
-        </nav>
-
-        <!-- MODAL: CREATE / EDIT SPLIT -->
-        <div x-show="openCreateSplitModal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
-            <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl max-h-[85vh] overflow-y-auto">
-                <h3 class="text-lg font-bold mb-4" x-text="editingSplitId ? 'Edit Workout Split' : 'Create Workout Split'"></h3>
-
-                <div class="space-y-4 mb-5">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 mb-1">Preset Category Name</label>
-                        <input type="text" x-model="newSplitPreset" placeholder="e.g., Push / Pull / Legs" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 mb-1">Split Day Name</label>
-                        <input type="text" x-model="newSplitName" placeholder="e.g., Push Day A" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none">
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="text-xs font-semibold text-gray-400">Exercises</label>
-                            <button @click="newSplitExercises.push({ name: '', set1: {weight:'', reps:''}, set2: {weight:'', reps:''}, set3: {weight:'', reps:''} })" class="text-xs font-medium" :class="textThemeClass">+ Add Exercise</button>
-                        </div>
-
-                        <div class="space-y-2">
-                            <template x-for="(ex, idx) in newSplitExercises" :key="idx">
-                                <div class="flex gap-2 items-center">
-                                    <input type="text" x-model="ex.name" :placeholder="'Exercise ' + (idx + 1)" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm focus:outline-none">
-                                    <button @click="newSplitExercises.splice(idx, 1)" class="text-gray-500 hover:text-red-400 px-2"><i class="fa-solid fa-trash text-xs"></i></button>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex gap-2">
-                    <button @click="openCreateSplitModal = false" class="w-1/2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2.5 rounded-xl text-sm transition">Cancel</button>
-                    <button @click="saveSplit()" :class="btnThemeClass" class="w-1/2 text-white font-medium py-2.5 rounded-xl text-sm transition">Save Split</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- MODAL: SETTINGS & CUSTOMIZATION -->
-        <div x-show="openSettingsModal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
-            <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl">
-                <h3 class="text-lg font-bold mb-4">App Settings</h3>
-
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-400 mb-2">Accent Theme</label>
-                        <div class="grid grid-cols-4 gap-2">
-                            <button @click="setTheme('blue')" :class="theme === 'blue' ? 'border-white' : 'border-transparent'" class="bg-blue-600 h-10 rounded-xl border-2 transition"></button>
-                            <button @click="setTheme('emerald')" :class="theme === 'emerald' ? 'border-white' : 'border-transparent'" class="bg-emerald-600 h-10 rounded-xl border-2 transition"></button>
-                            <button @click="setTheme('purple')" :class="theme === 'purple' ? 'border-white' : 'border-transparent'" class="bg-purple-600 h-10 rounded-xl border-2 transition"></button>
-                            <button @click="setTheme('amber')" :class="theme === 'amber' ? 'border-white' : 'border-transparent'" class="bg-amber-600 h-10 rounded-xl border-2 transition"></button>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-gray-800">
-                        <button @click="resetAllData()" class="w-full bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm font-medium py-2.5 rounded-xl transition">
-                            Reset All Data
-                        </button>
-                    </div>
-                </div>
-
-                <button @click="openSettingsModal = false" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-medium py-2.5 rounded-xl text-sm transition">Close</button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- APP SCRIPT -->
     <script>
-        function workoutApp() {
-            return {
-                activeTab: 'splits',
-                splits: [],
-                workoutLogs: {},
-                streak: 0,
-                theme: 'blue',
-                
-                // Modals & States
-                openCreateSplitModal: false,
-                openSettingsModal: false,
-                editingSplitId: null,
-                newSplitPreset: '',
-                newSplitName: '',
-                newSplitExercises: [{ name: '', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} }],
-                
-                currentWorkoutSplit: null,
-                activeLogViewDate: null,
-                activeLogData: null,
-
-                currentMonth: new Date().getMonth(),
-                currentYear: new Date().getFullYear(),
-                monthNames: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-                selectedCalendarDateStr: null,
-                selectedCalendarDateLog: null,
-
-                init() {
-                    if (localStorage.getItem('ironlog_theme')) {
-                        this.theme = localStorage.getItem('ironlog_theme');
-                    }
-                    const savedSplits = localStorage.getItem('ironlog_splits');
-                    if (savedSplits) {
-                        this.splits = JSON.parse(savedSplits);
-                    } else {
-                        this.splits = [
-                            {
-                                id: 1,
-                                presetName: 'Push / Pull / Legs',
-                                name: 'Push Day',
-                                exercises: [
-                                    { name: 'Bench Press', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} },
-                                    { name: 'Overhead Press', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} }
-                                ]
-                            }
-                        ];
-                        this.saveSplits();
-                    }
-
-                    const savedLogs = localStorage.getItem('ironlog_logs');
-                    if (savedLogs) this.workoutLogs = JSON.parse(savedLogs);
-
-                    this.calculateStreak();
-                },
-
-                setTheme(t) {
-                    this.theme = t;
-                    localStorage.setItem('ironlog_theme', t);
-                },
-
-                get btnThemeClass() {
-                    return {
-                        'bg-blue-600 hover:bg-blue-500 shadow-blue-600/30': this.theme === 'blue',
-                        'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30': this.theme === 'emerald',
-                        'bg-purple-600 hover:bg-purple-500 shadow-purple-600/30': this.theme === 'purple',
-                        'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30': this.theme === 'amber'
-                    };
-                },
-
-                get textThemeClass() {
-                    return {
-                        'text-blue-400': this.theme === 'blue',
-                        'text-emerald-400': this.theme === 'emerald',
-                        'text-purple-400': this.theme === 'purple',
-                        'text-amber-400': this.theme === 'amber'
-                    };
-                },
-
-                get badgeThemeClass() {
-                    return {
-                        'text-blue-400 bg-blue-950': this.theme === 'blue',
-                        'text-emerald-400 bg-emerald-950': this.theme === 'emerald',
-                        'text-purple-400 bg-purple-950': this.theme === 'purple',
-                        'text-amber-400 bg-amber-950': this.theme === 'amber'
-                    };
-                },
-
-                get calendarHighlightClass() {
-                    return {
-                        'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30': this.theme === 'blue',
-                        'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/30': this.theme === 'emerald',
-                        'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/30': this.theme === 'purple',
-                        'bg-amber-600 text-white font-bold shadow-md shadow-amber-600/30': this.theme === 'amber'
-                    };
-                },
-
-                saveSplits() {
-                    localStorage.setItem('ironlog_splits', JSON.stringify(this.splits));
-                },
-
-                openCreateModal() {
-                    this.editingSplitId = null;
-                    this.newSplitName = '';
-                    this.newSplitPreset = '';
-                    this.newSplitExercises = [{ name: '', set1:{weight:'',reps:''}, set2:{weight:'',reps:''}, set3:{weight:'',reps:''} }];
-                    this.openCreateSplitModal = true;
-                },
-
-                editSplit(split) {
-                    this.editingSplitId = split.id;
-                    this.newSplitName = split.name;
-                    this.newSplitPreset = split.presetName;
-                    this.newSplitExercises = JSON.parse(JSON.stringify(split.exercises));
-                    this.openCreateSplitModal = true;
-                },
-
-                saveSplit() {
-                    if (!this.newSplitName || this.newSplitExercises.length === 0) {
-                        alert('Please fill out the split name and add at least one exercise.');
-                        return;
-                    }
-
-                    const cleanExercises = this.newSplitExercises.filter(e => e.name.trim() !== '').map(e => ({
-                        name: e.name,
-                        set1: e.set1 || { weight: '', reps: '' },
-                        set2: e.set2 || { weight: '', reps: '' },
-                        set3: e.set3 || { weight: '', reps: '' }
-                    }));
-
-                    if (this.editingSplitId) {
-                        const index = this.splits.findIndex(s => s.id === this.editingSplitId);
-                        if (index !== -1) {
-                            this.splits[index] = {
-                                id: this.editingSplitId,
-                                presetName: this.newSplitPreset || 'General Preset',
-                                name: this.newSplitName,
-                                exercises: cleanExercises
-                            };
-                        }
-                    } else {
-                        const newSplit = {
-                            id: Date.now(),
-                            presetName: this.newSplitPreset || 'General Preset',
-                            name: this.newSplitName,
-                            exercises: cleanExercises
-                        };
-                        this.splits.push(newSplit);
-                    }
-
-                    this.saveSplits();
-                    this.openCreateSplitModal = false;
-                },
-
-                deleteSplit(id) {
-                    if (confirm('Are you sure you want to delete this split?')) {
-                        this.splits = this.splits.filter(s => s.id !== id);
-                        this.saveSplits();
-                    }
-                },
-
-                startWorkout(split) {
-                    this.currentWorkoutSplit = JSON.parse(JSON.stringify(split));
-                },
-
-                finishWorkout() {
-                    const todayStr = new Date().toISOString().split('T')[0];
-                    this.workoutLogs[todayStr] = {
-                        splitName: this.currentWorkoutSplit.name,
-                        presetName: this.currentWorkoutSplit.presetName,
-                        exercises: this.currentWorkoutSplit.exercises
-                    };
-                    localStorage.setItem('ironlog_logs', JSON.stringify(this.workoutLogs));
-                    this.calculateStreak();
-                    this.currentWorkoutSplit = null;
-                    alert('Workout logged successfully!');
-                },
-
-                get calendarDays() {
-                    const firstDayIndex = new Date(this.currentYear, this.currentMonth, 1).getDay();
-                    const totalDays = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-                    let days = [];
-                    for (let i = 0; i < firstDayIndex; i++) {
-                        days.push({ dayNum: '', dateStr: null, hasWorkout: false });
-                    }
-                    for (let d = 1; d <= totalDays; d++) {
-                        const formattedMonth = String(this.currentMonth + 1).padStart(2, '0');
-                        const formattedDay = String(d).padStart(2, '0');
-                        const dateStr = `${this.currentYear}-${formattedMonth}-${formattedDay}`;
-                        days.push({
-                            dayNum: d,
-                            dateStr: dateStr,
-                            hasWorkout: !!this.workoutLogs[dateStr]
-                        });
-                    }
-                    return days;
-                },
-
-                changeMonth(direction) {
-                    this.currentMonth += direction;
-                    if (this.currentMonth > 11) { this.currentMonth = 0; this.currentYear++; }
-                    else if (this.currentMonth < 0) { this.currentMonth = 11; this.currentYear--; }
-                },
-
-                viewLogForDate(dateStr) {
-                    this.selectedCalendarDateStr = dateStr;
-                    this.selectedCalendarDateLog = this.workoutLogs[dateStr] || null;
-                },
-
-                jumpToLogView(dateStr) {
-                    this.activeLogData = this.workoutLogs[dateStr];
-                    this.activeLogViewDate = dateStr;
-                    this.activeTab = 'splits';
-                },
-
-                calculateStreak() {
-                    let currentStreak = 0;
-                    let checkDate = new Date();
-                    const formatDate = (d) => {
-                        let month = '' + (d.getMonth() + 1), day = '' + d.getDate(), year = d.getFullYear();
-                        if (month.length < 2) month = '0' + month;
-                        if (day.length < 2) day = '0' + day;
-                        return [year, month, day].join('-');
-                    };
-                    let todayStr = formatDate(checkDate);
-                    if (!this.workoutLogs[todayStr]) {
-                        checkDate.setDate(checkDate.getDate() - 1);
-                        todayStr = formatDate(checkDate);
-                        if (!this.workoutLogs[todayStr]) { this.streak = 0; return; }
-                    }
-                    while (true) {
-                        let dateStr = formatDate(checkDate);
-                        if (this.workoutLogs[dateStr]) {
-                            currentStreak++;
-                            checkDate.setDate(checkDate.getDate() - 1);
-                        } else { break; }
-                    }
-                    this.streak = currentStreak;
-                },
-
-                resetAllData() {
-                    if (confirm('Are you sure? This erases all data permanently.')) {
-                        localStorage.clear();
-                        location.reload();
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: '#111827',
+                        cardBorder: '#1f2937',
+                        accentIndigo: '#6366f1',
+                        accentCyan: '#06b6d4',
+                        accentEmerald: '#10b981'
                     }
                 }
             }
         }
     </script>
-</body>
-</html>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for milestones -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white pb-16">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-cardBorder">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+                    <i class="fa-solid fa-fire text-white text-base"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">GlowUp 90</h1>
+                    <p class="text-[10px] text-slate-400">3-Month Transformation Hub</p>
+                </div>
+            </div>
+            
+            <!-- Quick Streak & Header Stats -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <div class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs">
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <span id="headerStreakText" class="font-semibold text-slate-200">Streak: 0 Days</span>
+                </div>
+                <button onclick="completeAllToday()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white text-xs font-semibold shadow-lg shadow-indigo-600/20 transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span class="hidden sm:inline">Complete All Today</span>
+                    <span class="sm:hidden">All Done</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs Bar -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <div class="flex space-x-2 overflow-x-auto pb-2 border-b border-cardBorder">
+            <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                <i class="fa-solid fa-house"></i>
+                <span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('calendar')" id="tabBtn-calendar" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>90-Day Grid</span>
+            </button>
+            <button onclick="switchTab('analytics')" id="tabBtn-analytics" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Analytics</span>
+            </button>
+            <button onclick="switchTab('photos')" id="tabBtn-photos" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-camera"></i>
+                <span>Progress Photos</span>
+            </button>
+            <button onclick="switchTab('settings')" id="tabBtn-settings" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800/50">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings & Backup</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <div id="tab-dashboard" class="tab-content active space-y-6">
+            
+            <!-- Daily Quote Banner -->
+            <div class="relative overflow-hidden rounded-2xl glass-panel p-6 border border-indigo-500/20 bg-gradient-to-r from-indigo-950/40 via-slate-900/50 to-cyan-950/40 shadow-xl">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>Daily Focus</span>
+                        </div>
+                        <p id="dailyQuote" class="text-base sm:text-lg font-medium text-slate-200 italic">"Consistency is the quiet engine of radical transformation."</p>
+                    </div>
+                    <button onclick="newQuote()" class="whitespace-nowrap px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-shuffle"></i>
+                        <span>New Quote</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Overview Stat Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Day Card -->
+                <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Timeline Progress</div>
+                        <div class="flex items-baseline space-x-2">
+                            <span id="dashDayNum" class="text-2xl font-bold text-white">Day 1</span>
+                            <span class="text-xs text-slate-400">of 90 Days</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 space-y-1.5">
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="dashProgressBar" class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full w-[1%] transition-all duration-500"></div>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-400">
+                            <span id="dashPercentComplete">1% Done</span>
+                            <span id="dashDaysLeft">89 left</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today Score Card -->
+                <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Today's Habits Score</div>
+                        <div class="flex items-baseline space-x-2">
+                            <span id="dashScoreNum" class="text-2xl font-bold text-emerald-400">0/6</span>
+                            <span class="text-xs text-slate-400">Completed</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 space-y-1.5">
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="dashScoreBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-[0%] transition-all duration-500"></div>
+                        </div>
+                        <div class="flex justify-between text-[11px] text-slate-400">
+                            <span id="dashScorePercent">0%</span>
+                            <span id="dashScoreStatus" class="text-amber-400 font-medium">Keep Going</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Phase Card -->
+                <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Active Phase</div>
+                        <div id="dashPhaseTitle" class="text-base font-bold text-indigo-300 mt-0.5">Phase 1: Foundation</div>
+                    </div>
+                    <p id="dashPhaseDesc" class="text-xs text-slate-400 mt-2 line-clamp-2">Cellular turnover, water intake, and building discipline.</p>
+                </div>
+
+                <!-- Jump Day Card -->
+                <div class="glass-panel rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Active Day</div>
+                        <div class="flex space-x-2">
+                            <input type="number" id="dashJumpInput" min="1" max="90" placeholder="1-90" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                            <button onclick="jumpToDayFromDash()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition">Go</button>
+                        </div>
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-2 flex justify-between items-center">
+                        <span>Viewing: <strong id="dashViewingDay" class="text-white">Day 1</strong></span>
+                        <button onclick="selectToday()" class="text-indigo-400 hover:underline">Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Checklist Section -->
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cardBorder shadow-2xl">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center space-x-3">
+                            <span>Daily Protocol Checklist</span>
+                            <span id="checklistDayBadge" class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Day 1</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Check off habits for the selected day to compound your 3-month results.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeActiveDay(-1)" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition">
+                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                        </button>
+                        <button onclick="changeActiveDay(1)" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700 transition">
+                            Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Habit Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-6" id="habitsContainer">
+                    <!-- Habit 1 -->
+                    <label class="group relative flex items-start p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="checkbox" id="habit_water" onchange="toggleHabit('water')" class="mt-1 w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-800">
+                        <div class="ml-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-droplet text-cyan-400"></i>
+                                <span class="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition">Optimal Hydration</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">3-4L of water daily for skin turgor and cellular flush.</p>
+                        </div>
+                    </label>
+
+                    <!-- Habit 2 -->
+                    <label class="group relative flex items-start p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="checkbox" id="habit_skincare" onchange="toggleHabit('skincare')" class="mt-1 w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-800">
+                        <div class="ml-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-pump-soap text-indigo-400"></i>
+                                <span class="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition">Skincare Routine</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Gentle cleanse, targeted hydration, and daily broad-spectrum SPF.</p>
+                        </div>
+                    </label>
+
+                    <!-- Habit 3 -->
+                    <label class="group relative flex items-start p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="checkbox" id="habit_cardio" onchange="toggleHabit('cardio')" class="mt-1 w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-800">
+                        <div class="ml-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-heart-pulse text-rose-400"></i>
+                                <span class="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition">Cardio Session</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">30+ mins aerobic conditioning to boost circulation and fat loss.</p>
+                        </div>
+                    </label>
+
+                    <!-- Habit 4 -->
+                    <label class="group relative flex items-start p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="checkbox" id="habit_diet" onchange="toggleHabit('diet')" class="mt-1 w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-800">
+                        <div class="ml-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-carrot text-emerald-400"></i>
+                                <span class="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition">Whole-Food Diet</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Clean, nutrient-dense foods with zero processed sugars.</p>
+                        </div>
+                    </label>
+
+                    <!-- Habit 5 -->
+                    <label class="group relative flex items-start p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="checkbox" id="habit_neck" onchange="toggleHabit('neck')" class="mt-1 w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-800">
+                        <div class="ml-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-child-reaching text-amber-400"></i>
+                                <span class="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition">Neck Tucks & Curls</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Chin tucks & neck curls to eliminate tech neck and sharpen jawline.</p>
+                        </div>
+                    </label>
+
+                    <!-- Habit 6 -->
+                    <label class="group relative flex items-start p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 cursor-pointer transition">
+                        <input type="checkbox" id="habit_castor" onchange="toggleHabit('castor')" class="mt-1 w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-800">
+                        <div class="ml-3">
+                            <div class="flex items-center space-x-2">
+                                <i class="fa-solid fa-eye text-purple-400"></i>
+                                <span class="font-semibold text-xs sm:text-sm text-slate-200 group-hover:text-white transition">Castor Oil Eyebrows</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-1">Apply cold-pressed castor oil to condition and thicken brow hairs.</p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Daily Notes / Journal -->
+                <div class="mt-6 pt-6 border-t border-slate-800">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Daily Journal & Reflection</label>
+                    <textarea id="dailyNotes" oninput="saveDailyNotes()" rows="3" placeholder="How did you feel today? Note any skin changes, energy levels, or wins..." class="w-full bg-slate-900/80 border border-slate-700 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-indigo-500 placeholder-slate-600 resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: 90-DAY GRID CALENDAR ================= -->
+        <div id="tab-calendar" class="tab-content space-y-6">
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cardBorder shadow-2xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                            <i class="fa-solid fa-calendar-days text-indigo-400"></i>
+                            <span>90-Day Transformation Matrix</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Click any day cell to instantly jump to that day, inspect records, or edit logs.</p>
+                    </div>
+                    <div class="flex items-center space-x-4 text-xs text-slate-400">
+                        <div class="flex items-center space-x-1.5"><div class="w-3 h-3 rounded bg-emerald-500"><span></span></div><span>Complete (6/6)</span></div>
+                        <div class="flex items-center space-x-1.5"><div class="w-3 h-3 rounded bg-indigo-600/60"><span></span></div><span>Partial</span></div>
+                        <div class="flex items-center space-x-1.5"><div class="w-3 h-3 rounded bg-slate-800"><span></span></div><span>Unlogged</span></div>
+                    </div>
+                </div>
+
+                <!-- 90 Days Grid Container -->
+                <div class="grid grid-cols-7 sm:grid-cols-10 md:grid-cols-15 gap-2.5 my-6" id="calendarGrid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: ANALYTICS ================= -->
+        <div id="tab-analytics" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Streak Stats Card -->
+                <div class="glass-panel rounded-3xl p-6 border border-cardBorder flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Streak Records</div>
+                        <div class="space-y-4 mt-4">
+                            <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                                <span class="text-xs text-slate-300">Current Streak</span>
+                                <span id="statCurrentStreak" class="text-xl font-bold text-amber-400">0 Days</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                                <span class="text-xs text-slate-300">Best Streak</span>
+                                <span id="statBestStreak" class="text-xl font-bold text-emerald-400">0 Days</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-6">Streaks require all 6 daily habits completed consecutively.</p>
+                </div>
+
+                <!-- Completion Stats Card -->
+                <div class="glass-panel rounded-3xl p-6 border border-cardBorder md:col-span-2">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Habit Consistency Breakdown (90-Day Total)</div>
+                    <div class="space-y-4" id="habitBreakdownContainer">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: PROGRESS PHOTOS ================= -->
+        <div id="tab-photos" class="tab-content space-y-6">
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cardBorder shadow-2xl">
+                <div class="pb-6 border-b border-slate-800">
+                    <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-camera text-indigo-400"></i>
+                        <span>Visual Progress Log</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Upload or capture check-in photos securely in your browser's local storage for Day 1, 30, 60, and 90.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 my-6" id="photoMilestonesGrid">
+                    <!-- Milestone Card 1 -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col items-center">
+                        <div class="text-xs font-semibold text-indigo-400 uppercase mb-3">Day 1 - Baseline</div>
+                        <div id="photoContainer_1" class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative group">
+                            <span class="text-xs text-slate-500">No Photo Added</span>
+                        </div>
+                        <input type="file" id="fileInput_1" accept="image/*" onchange="handlePhotoUpload(1)" class="hidden">
+                        <div class="flex space-x-2 w-full mt-3">
+                            <button onclick="document.getElementById('fileInput_1').click()" class="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-xs font-medium transition">Upload</button>
+                            <button onclick="clearPhoto(1)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Milestone Card 2 -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col items-center">
+                        <div class="text-xs font-semibold text-cyan-400 uppercase mb-3">Day 30 - Milestone</div>
+                        <div id="photoContainer_30" class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative group">
+                            <span class="text-xs text-slate-500">No Photo Added</span>
+                        </div>
+                        <input type="file" id="fileInput_30" accept="image/*" onchange="handlePhotoUpload(30)" class="hidden">
+                        <div class="flex space-x-2 w-full mt-3">
+                            <button onclick="document.getElementById('fileInput_30').click()" class="w-full py-2 bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-medium transition">Upload</button>
+                            <button onclick="clearPhoto(30)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Milestone Card 3 -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col items-center">
+                        <div class="text-xs font-semibold text-teal-400 uppercase mb-3">Day 60 - Milestone</div>
+                        <div id="photoContainer_60" class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative group">
+                            <span class="text-xs text-slate-500">No Photo Added</span>
+                        </div>
+                        <input type="file" id="fileInput_60" accept="image/*" onchange="handlePhotoUpload(60)" class="hidden">
+                        <div class="flex space-x-2 w-full mt-3">
+                            <button onclick="document.getElementById('fileInput_60').click()" class="w-full py-2 bg-teal-600/20 hover:bg-teal-600/30 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-medium transition">Upload</button>
+                            <button onclick="clearPhoto(60)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Milestone Card 4 -->
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex flex-col items-center">
+                        <div class="text-xs font-semibold text-emerald-400 uppercase mb-3">Day 90 - Completion</div>
+                        <div id="photoContainer_90" class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center overflow-hidden relative group">
+                            <span class="text-xs text-slate-500">No Photo Added</span>
+                        </div>
+                        <input type="file" id="fileInput_90" accept="image/*" onchange="handlePhotoUpload(90)" class="hidden">
+                        <div class="flex space-x-2 w-full mt-3">
+                            <button onclick="document.getElementById('fileInput_90').click()" class="w-full py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-medium transition">Upload</button>
+                            <button onclick="clearPhoto(90)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: SETTINGS & BACKUP ================= -->
+        <div id="tab-settings" class="tab-content space-y-6">
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-cardBorder shadow-2xl max-w-2xl mx-auto space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-gear text-indigo-400"></i>
+                        <span>Settings & Data Management</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Export your progress as a backup JSON file or restore from a previous backup.</p>
+                </div>
+
+                <div class="space-y-4 pt-4 border-t border-slate-800">
+                    <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">Export Progress Data</div>
+                            <div class="text-xs text-slate-400">Save all habits, streaks, and journals to a JSON file.</div>
+                        </div>
+                        <button onclick="exportData()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition shadow-lg shadow-indigo-600/20">Export JSON</button>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-2xl border border-slate-800">
+                        <div>
+                            <div class="text-sm font-semibold text-slate-200">Import Progress Data</div>
+                            <div class="text-xs text-slate-400">Restore your journey from a backup JSON file.</div>
+                        </div>
+                        <div>
+                            <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
+                            <button onclick="document.getElementById('importFile').click()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition">Import JSON</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-4 bg-rose-950/20 rounded-2xl border border-rose-900/30">
+                        <div>
+                            <div class="text-sm font-semibold text-rose-300">Reset All Progress</div>
+                            <div class="text-xs text-rose-400/80">Permanently clear all checked habits, streaks, and photos.</div>
+                        </div>
+                        <button onclick="openResetModal()" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-semibold transition shadow-lg shadow-rose-600/20">Reset Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Reset Modal -->
+    <div id="resetModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden">
+        <div class="glass-panel rounded-3xl p-6 max-w-md w-full mx-4 border border-cardBorder shadow-2xl space-y-4">
+            <h3 class="text-base font-bold text-white">Reset All Progress?</h3>
+            <p class="text-xs text-slate-400">This will permanently delete all your checked habits, journal notes, streaks, and saved progress photos. This action cannot be undone.</p>
+            <div class="flex space-x-3 pt-2">
+                <button onclick="closeResetModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">Cancel</button>
+                <button onclick="confirmReset()" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs transition shadow-lg shadow-rose-600/20">Yes, Reset All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // State Management
+        let activeDay = 1;
+        const totalDays = 90;
+        const habitsList = ['water', 'skincare', 'cardio', 'diet', 'neck', 'castor'];
+
+        const quotes = [
+            "\"Consistency is the quiet engine of radical transformation.\"",
+            "\"Your future self is watching you right now through your daily habits.\"",
+            "\"Small daily disciplines compound into massive aesthetic results over 90 days.\"",
+            "\"Discipline is choosing between what you want now and what you want most.\"",
+            "\"Glow is simply health made visible.\"",
+            "\"Take care of your body. It's the only place you have to live.\""
+        ];
+
+        // Initialize on Load
+        window.onload = function() {
+            const savedDay = localStorage.getItem('glowup_active_day');
+            if (savedDay) {
+                activeDay = parseInt(savedDay);
+            }
+            newQuote();
+            renderAll();
+        };
+
+        // Tab Navigation
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition text-slate-400 hover:text-white hover:bg-slate-800/50";
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+            activeBtn.className = "tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 transition bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
+
+            if (tabId === 'calendar') renderCalendarGrid();
+            if (tabId === 'analytics') renderAnalytics();
+            if (tabId === 'photos') renderPhotosTab();
+        }
+
+        function newQuote() {
+            const rand = Math.floor(Math.random() * quotes.length);
+            document.getElementById('dailyQuote').innerText = quotes[rand];
+        }
+
+        // Change Active Day
+        function changeActiveDay(amount) {
+            activeDay += amount;
+            if (activeDay < 1) activeDay = 1;
+            if (activeDay > totalDays) activeDay = totalDays;
+            localStorage.setItem('glowup_active_day', activeDay);
+            renderAll();
+        }
+
+        function jumpToDayFromDash() {
+            const input = document.getElementById('dashJumpInput');
+            const val = parseInt(input.value);
+            if (val >= 1 && val <= totalDays) {
+                activeDay = val;
+                localStorage.setItem('glowup_active_day', activeDay);
+                input.value = '';
+                renderAll();
+            } else {
+                showToast("Please enter a day between 1 and 90.");
+            }
+        }
+
+        function jumpToDay(dayNum) {
+            activeDay = dayNum;
+            localStorage.setItem('glowup_active_day', activeDay);
+            switchTab('dashboard');
+            renderAll();
+        }
+
+        function selectToday() {
+            let startDate = localStorage.getItem('glowup_start_date');
+            if (!startDate) {
+                startDate = new Date().toISOString();
+                localStorage.setItem('glowup_start_date', startDate);
+            }
+            const diffTime = Math.abs(new Date() - new Date(startDate));
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            activeDay = Math.min(Math.max(diffDays, 1), 90);
+            localStorage.setItem('glowup_active_day', activeDay);
+            renderAll();
+        }
+
+        // Render Dashboard & Core UI
+        function renderAll() {
+            // Header streak
+            const currentStreak = calculateCurrentStreak();
+            document.getElementById('headerStreakText').innerText = `Streak: ${currentStreak} Days`;
+
+            // Dashboard cards
+            document.getElementById('dashDayNum').innerText = `Day ${activeDay}`;
+            document.getElementById('checklistDayBadge').innerText = `Day ${activeDay}`;
+            document.getElementById('dashViewingDay').innerText = `Day ${activeDay}`;
+            
+            const percent = Math.round((activeDay / totalDays) * 100);
+            document.getElementById('dashProgressBar').style.width = `${percent}%`;
+            document.getElementById('dashPercentComplete').innerText = `${percent}% Done`;
+            document.getElementById('dashDaysLeft').innerText = `${totalDays - activeDay} left`;
+
+            // Active phase
+            const phaseTitle = document.getElementById('dashPhaseTitle');
+            const phaseDesc = document.getElementById('dashPhaseDesc');
+            if (activeDay <= 30) {
+                phaseTitle.innerText = "Phase 1: Foundation";
+                phaseDesc.innerText = "Cellular turnover, water intake, and building discipline.";
+            } else if (activeDay <= 60) {
+                phaseTitle.innerText = "Phase 2: Visible Shifts";
+                phaseDesc.innerText = "Cardio & clean diet reducing fat. Submental area firms up.";
+            } else {
+                phaseTitle.innerText = "Phase 3: Compounding Peak";
+                phaseDesc.innerText = "Sharp jawline contours, fuller conditioned brows, and peak vitality.";
+            }
+
+            // Habits checkboxes
+            let completedCount = 0;
+            habitsList.forEach(h => {
+                const key = `glowup_day_${activeDay}_${h}`;
+                const isChecked = localStorage.getItem(key) === 'true';
+                const checkbox = document.getElementById(`habit_${h}`);
+                if (checkbox) {
+                    checkbox.checked = isChecked;
+                    if (isChecked) completedCount++;
+                }
+            });
+
+            // Score card
+            document.getElementById('dashScoreNum').innerText = `${completedCount}/6`;
+            const scorePercent = Math.round((completedCount / 6) * 100);
+            document.getElementById('dashScoreBar').style.width = `${scorePercent}%`;
+            document.getElementById('dashScorePercent').innerText = `${scorePercent}%`;
+            
+            const statusBadge = document.getElementById('dashScoreStatus');
+            if (completedCount === 6) {
+                statusBadge.innerText = "Perfect Day!";
+                statusBadge.className = "text-emerald-400 font-semibold";
+            } else if (completedCount >= 4) {
+                statusBadge.innerText = "Great Progress";
+                statusBadge.className = "text-cyan-400 font-medium";
+            } else {
+                statusBadge.innerText = "Keep Going";
+                statusBadge.className = "text-amber-400 font-medium";
+            }
+
+            // Notes
+            const notesKey = `glowup_day_${activeDay}_notes`;
+            document.getElementById('dailyNotes').value = localStorage.getItem(notesKey) || '';
+        }
+
+        // Toggle Habit
+        function toggleHabit(habitName) {
+            const checkbox = document.getElementById(`habit_${habitName}`);
+            const key = `glowup_day_${activeDay}_${habitName}`;
+            localStorage.setItem(key, checkbox.checked);
+
+            // Check if all 6 completed -> Trigger confetti
+            let allDone = true;
+            habitsList.forEach(h => {
+                if (localStorage.getItem(`glowup_day_${activeDay}_${h}`) !== 'true') {
+                    allDone = false;
+                }
+            });
+
+            if (allDone && checkbox.checked) {
+                confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            }
+
+            renderAll();
+        }
+
+        // Complete All Today
+        function completeAllToday() {
+            habitsList.forEach(h => {
+                localStorage.setItem(`glowup_day_${activeDay}_${h}`, 'true');
+            });
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+            renderAll();
+            showToast(`Completed all habits for Day ${activeDay}! 🔥`);
+        }
+
+        // Save Daily Notes
+        function saveDailyNotes() {
+            const val = document.getElementById('dailyNotes').value;
+            localStorage.setItem(`glowup_day_${activeDay}_notes`, val);
+        }
+
+        // Streak Calculations
+        function calculateCurrentStreak() {
+            let streak = 0;
+            let checkDay = activeDay;
+            while (checkDay >= 1) {
+                let dayDone = true;
+                for (let h of habitsList) {
+                    if (localStorage.getItem(`glowup_day_${checkDay}_${h}`) !== 'true') {
+                        dayDone = false;
+                        break;
+                    }
+                }
+                if (dayDone) {
+                    streak++;
+                    checkDay--;
+                } else {
+                    if (checkDay === activeDay) {
+                        checkDay--;
+                        continue;
+                    }
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function calculateBestStreak() {
+            let best = 0;
+            let current = 0;
+            for (let d = 1; d <= totalDays; d++) {
+                let dayDone = true;
+                for (let h of habitsList) {
+                    if (localStorage.getItem(`glowup_day_${d}_${h}`) !== 'true') {
+                        dayDone = false;
+                        break;
+                    }
+                }
+                if (dayDone) {
+                    current++;
+                    if (current > best) best = current;
+                } else {
+                    current = 0;
+                }
+            }
+            return best;
+        }
+
+        // Render Calendar Grid Tab
+        function renderCalendarGrid() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            for (let d = 1; d <= totalDays; d++) {
+                let completedCount = 0;
+                habitsList.forEach(h => {
+                    if (localStorage.getItem(`glowup_day_${d}_${h}`) === 'true') completedCount++;
+                });
+
+                let bgClass = "bg-slate-900/60 border-slate-800 text-slate-400";
+                if (completedCount === 6) {
+                    bgClass = "bg-emerald-600/20 border-emerald-500/40 text-emerald-300 font-bold";
+                } else if (completedCount > 0) {
+                    bgClass = "bg-indigo-600/20 border-indigo-500/40 text-indigo-300 font-semibold";
+                }
+
+                if (d === activeDay) {
+                    bgClass += " ring-2 ring-indigo-400";
+                }
+
+                const cell = document.createElement('div');
+                cell.className = `h-14 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition hover:scale-105 ${bgClass}`;
+                cell.innerHTML = `
+                    <span class="text-xs">D${d}</span>
+                    <span class="text-[10px] opacity-80">${completedCount}/6</span>
+                `;
+                cell.onclick = () => jumpToDay(d);
+                grid.appendChild(cell);
+            }
+        }
+
+        // Render Analytics Tab
+        function renderAnalytics() {
+            document.getElementById('statCurrentStreak').innerText = `${calculateCurrentStreak()} Days`;
+            document.getElementById('statBestStreak').innerText = `${calculateBestStreak()} Days`;
+
+            const container = document.getElementById('habitBreakdownContainer');
+            container.innerHTML = '';
+
+            const habitNames = {
+                water: 'Optimal Hydration (3-4L)',
+                skincare: 'Skincare Routine & SPF',
+                cardio: 'Cardio Session (30+ mins)',
+                diet: 'Whole-Food Healthy Diet',
+                neck: 'Neck Tucks & Curls',
+                castor: 'Castor Oil Eyebrows'
+            };
+
+            habitsList.forEach(h => {
+                let count = 0;
+                for (let d = 1; d <= totalDays; d++) {
+                    if (localStorage.getItem(`glowup_day_${d}_${h}`) === 'true') count++;
+                }
+                const percent = Math.round((count / totalDays) * 100);
+
+                const item = document.createElement('div');
+                item.className = "space-y-1.5";
+                item.innerHTML = `
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-300 font-medium">${habitNames[h]}</span>
+                        <span class="text-indigo-400 font-semibold">${count}/90 Days (${percent}%)</span>
+                    </div>
+                    <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+                        <div class="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full transition-all duration-500" style="width: ${percent}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Render Progress Photos Tab
+        function renderPhotosTab() {
+            [1, 30, 60, 90].forEach(milestone => {
+                const savedPhoto = localStorage.getItem(`glowup_photo_${milestone}`);
+                const container = document.getElementById(`photoContainer_${milestone}`);
+                if (savedPhoto) {
+                    container.innerHTML = `<img src="${savedPhoto}" class="w-full h-full object-cover">`;
+                } else {
+                    container.innerHTML = `<span class="text-xs text-slate-500">No Photo Added</span>`;
+                }
+            });
+        }
+
+        function handlePhotoUpload(milestone) {
+            const input = document.getElementById(`fileInput_${milestone}`);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    localStorage.setItem(`glowup_photo_${milestone}`, e.target.result);
+                    renderPhotosTab();
+                    showToast(`Saved Day ${milestone} photo successfully!`);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearPhoto(milestone) {
+            localStorage.removeItem(`glowup_photo_${milestone}`);
+            renderPhotosTab();
+            showToast(`Cleared Day ${milestone} photo.`);
+        }
+
+        // Export & Import Data
+        function exportData() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('glowup_')) {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `glowup-90-backup-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            showToast("Exported progress data successfully!");
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    Object.keys(data).forEach(key => {
+                        if (key.startsWith('glowup_')) {
+                            localStorage.setItem(key, data[key]);
+                        }
+                    });
+                    renderAll();
+                    showToast("Imported progress data successfully!");
+                } catch (err) {
+                    showToast("Invalid backup JSON file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Modal Controls
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function confirmReset() {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('glowup_')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            activeDay = 1;
+            closeResetModal();
+            renderAll();
+            switchTab('dashboard');
+            showToast("Reset all progress data.");
+        }
