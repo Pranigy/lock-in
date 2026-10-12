@@ -46,20 +46,24 @@
             </div>
 
             <!-- Tab Navigation Buttons -->
-            <nav class="flex items-center bg-darkBg/80 p-1.5 rounded-xl border border-cardBorder gap-1">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all bg-accent text-white shadow-lg shadow-accent/20">
+            <nav class="flex flex-wrap items-center justify-center bg-darkBg/80 p-1.5 rounded-xl border border-cardBorder gap-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all bg-accent text-white shadow-lg shadow-accent/20">
                     <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
                     <span>Dashboard</span>
                 </button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <button onclick="switchTab('photos')" id="nav-photos" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>Photos</span>
+                </button>
+                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                     <span>90-Day Grid</span>
                 </button>
-                <button onclick="switchTab('analytics')" id="nav-analytics" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <button onclick="switchTab('analytics')" id="nav-analytics" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
                     <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
                     <span>Analytics</span>
                 </button>
-                <button onclick="switchTab('settings')" id="nav-settings" class="tab-btn px-4 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                <button onclick="switchTab('settings')" id="nav-settings" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
                     <i data-lucide="settings" class="w-4 h-4"></i>
                     <span>Settings</span>
                 </button>
@@ -100,19 +104,19 @@
 
             <!-- Day Selector Bar -->
             <div class="glass rounded-2xl p-4 flex items-center justify-between gap-4">
-                <button onclick="changeDay(-1)" class="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-cardBorder text-slate-300 transition-all flex items-center space-x-2 text-xs font-semibold">
+                <button onclick="changeDay(-1)" class="p-2.5 bg-white/5 hover:bg-white/15 rounded-xl border border-cardBorder text-slate-200 transition-all flex items-center space-x-2 text-xs font-semibold cursor-pointer">
                     <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     <span>Prev Day</span>
                 </button>
                 
                 <div class="flex items-center space-x-3">
                     <label for="day-jump-select" class="text-xs text-slate-400 font-medium">Jump to:</label>
-                    <select id="day-jump-select" onchange="jumpToSelectedDay(this.value)" class="bg-darkBg border border-cardBorder text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-accent">
+                    <select id="day-jump-select" onchange="jumpToSelectedDay(this.value)" class="bg-darkBg border border-cardBorder text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-accent cursor-pointer">
                         <!-- Populated dynamically -->
                     </select>
                 </div>
 
-                <button onclick="changeDay(1)" class="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl border border-cardBorder text-slate-300 transition-all flex items-center space-x-2 text-xs font-semibold">
+                <button onclick="changeDay(1)" class="p-2.5 bg-white/5 hover:bg-white/15 rounded-xl border border-cardBorder text-slate-200 transition-all flex items-center space-x-2 text-xs font-semibold cursor-pointer">
                     <span>Next Day</span>
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </button>
@@ -132,7 +136,13 @@
                     <div class="space-y-2 flex-1">
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-bold tracking-wider text-accent uppercase">Daily Scripture Focus</span>
-                            <span id="verse-ref" class="text-xs text-slate-400 font-medium">Philippians 4:13</span>
+                            <div class="flex items-center space-x-3">
+                                <span id="verse-ref" class="text-xs text-slate-300 font-medium">Philippians 4:13</span>
+                                <button onclick="randomizeVerse()" class="p-1.5 bg-white/5 hover:bg-white/15 border border-cardBorder rounded-lg text-slate-200 transition-all flex items-center space-x-1 text-xs cursor-pointer" title="Randomize Verse">
+                                    <i data-lucide="shuffle" class="w-3.5 h-3.5 text-accent"></i>
+                                    <span class="hidden sm:inline">Randomize</span>
+                                </button>
+                            </div>
                         </div>
                         <p id="verse-text" class="text-slate-200 text-sm italic leading-relaxed">"I can do all things through Christ who strengthens me."</p>
                     </div>
@@ -151,6 +161,55 @@
                 <textarea id="daily-notes" oninput="saveDailyNotes(this.value)" placeholder="How did you feel today? Any wins on skincare, neck posture, or energy levels?" class="w-full h-28 bg-darkBg/60 border border-cardBorder rounded-xl p-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-accent resize-none"></textarea>
             </div>
 
+        </div>
+
+        <!-- ================= PHOTOS TAB ================= -->
+        <div id="tab-photos" class="tab-content space-y-6 hidden">
+            <div class="glass rounded-2xl p-6 space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold">Daily Progress Photos</h3>
+                    <p class="text-xs text-slate-400 mt-1">Snap or upload a photo every day to visually capture your glow-up evolution. Saved securely in your browser storage.</p>
+                </div>
+
+                <!-- Photo Upload Box for Active Day -->
+                <div class="glass rounded-2xl p-6 border border-accent/30 bg-accent/5 flex flex-col md:flex-row items-center gap-6">
+                    <div class="w-full md:w-1/3 aspect-[3/4] bg-darkBg border border-cardBorder rounded-xl overflow-hidden flex items-center justify-center relative group">
+                        <img id="active-day-photo-preview" src="" alt="No photo for today" class="w-full h-full object-cover hidden">
+                        <div id="active-day-photo-placeholder" class="text-center p-4 text-slate-500">
+                            <i data-lucide="camera" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+                            <span class="text-xs font-medium">No photo logged for Day <span id="photo-current-day-label">1</span></span>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 space-y-4 w-full">
+                        <div>
+                            <span class="px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-xs font-semibold">Day <span id="photo-badge-day">1</span> Photo Log</span>
+                            <h4 class="text-base font-bold text-slate-200 mt-2">Capture Your Transformation</h4>
+                            <p class="text-xs text-slate-400 mt-1">Upload a clear photo for today. Consistent lighting and angles will make your 90-day comparison stand out.</p>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            <label class="px-4 py-2.5 bg-accent hover:bg-accentHover text-white text-xs font-bold rounded-xl shadow-lg shadow-accent/25 transition-all flex items-center space-x-2 cursor-pointer">
+                                <i data-lucide="upload" class="w-4 h-4"></i>
+                                <span>Upload Photo</span>
+                                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
+                            </label>
+                            <button id="delete-photo-btn" onclick="deleteActivePhoto()" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 hidden cursor-pointer">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <span>Remove Photo</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gallery Grid of Logged Photos -->
+                <div class="space-y-4 pt-4 border-t border-cardBorder">
+                    <h4 class="text-sm font-bold text-slate-200">Your Journey Gallery (All Logged Days)</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="photo-gallery-grid">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ================= 90-DAY GRID TAB ================= -->
@@ -201,16 +260,16 @@
                     <p class="text-xs text-slate-400 mt-1">Export your progress backup or reset your tracker data.</p>
                 </div>
                 <div class="flex flex-wrap gap-4 pt-2">
-                    <button onclick="exportData()" class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-cardBorder rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all">
+                    <button onclick="exportData()" class="px-4 py-2.5 bg-white/5 hover:bg-white/15 border border-cardBorder rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
                         <i data-lucide="download" class="w-4 h-4 text-accent"></i>
                         <span>Export Backup (JSON)</span>
                     </button>
-                    <label class="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-cardBorder rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
+                    <label class="px-4 py-2.5 bg-white/5 hover:bg-white/15 border border-cardBorder rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
                         <i data-lucide="upload" class="w-4 h-4 text-emerald-400"></i>
                         <span>Import Backup</span>
                         <input type="file" accept=".json" onchange="importData(event)" class="hidden">
                     </label>
-                    <button onclick="resetAllData()" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all">
+                    <button onclick="resetAllData()" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                         <span>Reset All Data</span>
                     </button>
@@ -233,7 +292,7 @@
             { id: 'eyebrows', name: 'Castor Oil for Eyebrows', desc: 'Ricinoleic acid application for glossy, conditioned brows', icon: 'eye', color: 'text-purple-400' }
         ];
 
-        // 90 Daily Bible Verses Rotation
+        // 90 Daily Bible Verses Rotation & Pool
         const bibleVerses = [
             { ref: "Philippians 4:13", text: "I can do all things through Christ who strengthens me." },
             { ref: "Psalm 139:14", text: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well." },
@@ -244,12 +303,18 @@
             { ref: "3 John 1:2", text: "Dear friend, I pray that you may enjoy good health and that all may go well with you, even as your soul is getting along well." },
             { ref: "Psalm 118:24", text: "The Lord has done it this very day; let us rejoice today and be glad in it." },
             { ref: "Colossians 3:23", text: "Whatever you do, work at it with all your heart, as working for the Lord, not for human masters." },
-            { ref: "Psalm 46:5", text: "God is within her, she will not fall; God will help her at break of day." }
+            { ref: "Psalm 46:5", text: "God is within her, she will not fall; God will help her at break of day." },
+            { ref: "Proverbs 4:20-22", text: "My son, pay attention to what I say; turn your ear to my words. Do not let them out of your sight, keep them within your heart; for they are life to those who find them and health to one's whole body." },
+            { ref: "Joshua 1:9", text: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go." },
+            { ref: "Psalm 23:1-3", text: "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul." },
+            { ref: "Matthew 6:33", text: "But seek first his kingdom and his righteousness, and all these things will be given to you as well." },
+            { ref: "Romans 8:28", text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose." }
         ];
 
         // State Management
         let currentDay = parseInt(localStorage.getItem('glowup_current_day')) || 1;
         let userData = JSON.parse(localStorage.getItem('glowup_user_data')) || {};
+        let activeVerseIndex = null;
 
         // Initialize App
         function initApp() {
@@ -257,6 +322,7 @@
             renderDashboard();
             renderCalendarGrid();
             renderAnalytics();
+            renderPhotosTab();
             lucide.createIcons();
         }
 
@@ -275,6 +341,7 @@
 
             if(tabId === 'calendar') renderCalendarGrid();
             if(tabId === 'analytics') renderAnalytics();
+            if(tabId === 'photos') renderPhotosTab();
             lucide.createIcons();
         }
 
@@ -294,7 +361,9 @@
         function jumpToSelectedDay(dayNum) {
             currentDay = parseInt(dayNum);
             localStorage.setItem('glowup_current_day', currentDay);
+            activeVerseIndex = null; // reset verse override on day change
             renderDashboard();
+            renderPhotosTab();
         }
 
         function changeDay(direction) {
@@ -303,7 +372,9 @@
                 currentDay = newDay;
                 localStorage.setItem('glowup_current_day', currentDay);
                 document.getElementById('day-jump-select').value = currentDay;
+                activeVerseIndex = null;
                 renderDashboard();
+                renderPhotosTab();
             }
         }
 
@@ -312,7 +383,7 @@
             document.getElementById('header-day-title').textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
             
             if (!userData[currentDay]) {
-                userData[currentDay] = { habits: {}, notes: '' };
+                userData[currentDay] = { habits: {}, notes: '', photo: null };
             }
 
             // Render Habits
@@ -327,7 +398,6 @@
                 const card = document.createElement('div');
                 card.className = `glass rounded-2xl p-5 border transition-all flex items-start space-x-4 cursor-pointer hover:border-accent/40 ${isChecked ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-cardBorder'}`;
                 card.onclick = (e) => {
-                    // Prevent double triggering if clicked directly on checkbox
                     if(e.target.tagName !== 'INPUT') toggleHabit(habit.id);
                 };
 
@@ -354,8 +424,10 @@
             document.getElementById('daily-notes').value = userData[currentDay].notes || '';
 
             // Daily Bible Verse
-            const verseIndex = (currentDay - 1) % bibleVerses.length;
-            const verse = bibleVerses[verseIndex];
+            if (activeVerseIndex === null) {
+                activeVerseIndex = (currentDay - 1) % bibleVerses.length;
+            }
+            const verse = bibleVerses[activeVerseIndex];
             document.getElementById('verse-ref').textContent = verse.ref;
             document.getElementById('verse-text').textContent = `"${verse.text}"`;
 
@@ -363,9 +435,22 @@
             lucide.createIcons();
         }
 
+        // Randomize Bible Verse
+        function randomizeVerse() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * bibleVerses.length);
+            } while (newIndex === activeVerseIndex && bibleVerses.length > 1);
+            
+            activeVerseIndex = newIndex;
+            const verse = bibleVerses[activeVerseIndex];
+            document.getElementById('verse-ref').textContent = verse.ref;
+            document.getElementById('verse-text').textContent = `"${verse.text}"`;
+        }
+
         // Toggle Habit
         function toggleHabit(habitId) {
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '' };
+            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
             userData[currentDay].habits[habitId] = !userData[currentDay].habits[habitId];
             saveData();
             renderDashboard();
@@ -373,7 +458,7 @@
 
         // Complete All Today
         function completeAllToday() {
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '' };
+            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
             habitsList.forEach(h => {
                 userData[currentDay].habits[h.id] = true;
             });
@@ -383,9 +468,87 @@
 
         // Save Notes
         function saveDailyNotes(val) {
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '' };
+            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
             userData[currentDay].notes = val;
             saveData();
+        }
+
+        // Photo Upload Handling
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
+                userData[currentDay].photo = e.target.result;
+                saveData();
+                renderPhotosTab();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function deleteActivePhoto() {
+            if (userData[currentDay]) {
+                userData[currentDay].photo = null;
+                saveData();
+                renderPhotosTab();
+            }
+        }
+
+        function renderPhotosTab() {
+            document.getElementById('photo-current-day-label').textContent = currentDay;
+            document.getElementById('photo-badge-day').textContent = currentDay;
+
+            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
+
+            const previewImg = document.getElementById('active-day-photo-preview');
+            const placeholder = document.getElementById('active-day-photo-placeholder');
+            const deleteBtn = document.getElementById('delete-photo-btn');
+
+            if (userData[currentDay].photo) {
+                previewImg.src = userData[currentDay].photo;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                deleteBtn.classList.remove('hidden');
+            } else {
+                previewImg.src = '';
+                previewImg.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                deleteBtn.classList.add('hidden');
+            }
+
+            // Render Gallery Grid
+            const galleryGrid = document.getElementById('photo-gallery-grid');
+            galleryGrid.innerHTML = '';
+
+            for (let i = 1; i <= TOTAL_DAYS; i++) {
+                const hasPhoto = userData[i] && userData[i].photo;
+                const cell = document.createElement('div');
+                cell.className = `aspect-[3/4] rounded-xl border flex flex-col items-center justify-center overflow-hidden relative cursor-pointer transition-all hover:scale-105 ${hasPhoto ? 'border-accent/50 bg-darkBg' : 'border-cardBorder bg-darkBg/40 text-slate-600'}`;
+                
+                if (hasPhoto) {
+                    cell.innerHTML = `
+                        <img src="${userData[i].photo}" alt="Day ${i}" class="w-full h-full object-cover">
+                        <div class="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/70 rounded text-[10px] font-bold text-white">Day ${i}</div>
+                    `;
+                } else {
+                    cell.innerHTML = `
+                        <i data-lucide="image" class="w-5 h-5 opacity-30 mb-1"></i>
+                        <span class="text-[10px] font-semibold">Day ${i}</span>
+                    `;
+                }
+
+                cell.onclick = () => {
+                    currentDay = i;
+                    document.getElementById('day-jump-select').value = i;
+                    localStorage.setItem('glowup_current_day', currentDay);
+                    renderPhotosTab();
+                };
+
+                galleryGrid.appendChild(cell);
+            }
+            lucide.createIcons();
         }
 
         // Streak Calculation
@@ -431,7 +594,7 @@
                 }
 
                 const cell = document.createElement('button');
-                cell.className = `h-10 rounded-xl border flex flex-col items-center justify-center text-xs font-bold transition-all hover:scale-105 ${statusClass} ${i === currentDay ? 'ring-2 ring-white' : ''}`;
+                cell.className = `h-10 rounded-xl border flex flex-col items-center justify-center text-xs font-bold transition-all hover:scale-105 cursor-pointer ${statusClass} ${i === currentDay ? 'ring-2 ring-white' : ''}`;
                 cell.innerHTML = `<span>${i}</span>`;
                 cell.onclick = () => {
                     currentDay = i;
