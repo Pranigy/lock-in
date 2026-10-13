@@ -1,685 +1,584 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlowUp 90-Day Master Tracker</title>
+    <title>Habit & Quit Tracker</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#0b0f19',
-                        cardBg: '#131c2e',
-                        cardBorder: '#1e293b',
-                        accent: '#6366f1',
-                        accentHover: '#4f46e5'
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
+    <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(19, 28, 46, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.07); }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 </head>
-<body class="bg-darkBg text-slate-100 min-h-screen pb-16 selection:bg-accent selection:text-white">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col md:flex-row">
 
-    <!-- Top Header -->
-    <header class="border-b border-cardBorder bg-cardBg/50 sticky top-0 z-40 backdrop-blur-md">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-accent/20 border border-accent/30 rounded-xl text-accent">
-                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+    <aside class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-sm z-10">
+        <div>
+            <!-- App Logo / Header -->
+            <div class="p-6 border-b border-slate-100 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">GlowUp 90-Day Tracker</h1>
-                    <p class="text-xs text-slate-400">Water • Skincare • Cardio • Diet • Neck • Eyebrows</p>
+                    <h1 class="font-bold text-lg tracking-tight text-slate-900">HabitFlow</h1>
+                    <p class="text-xs text-slate-400 font-medium">Build & Break</p>
                 </div>
             </div>
 
-            <!-- Tab Navigation Buttons -->
-            <nav class="flex flex-wrap items-center justify-center bg-darkBg/80 p-1.5 rounded-xl border border-cardBorder gap-1">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all bg-accent text-white shadow-lg shadow-accent/20">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                    <span>Dashboard</span>
+            <!-- Navigation Links -->
+            <nav class="p-4 space-y-1.5">
+                <button onclick="switchTab('habit')" id="nav-habit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all bg-indigo-50 text-indigo-700 shadow-sm">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                    <span>Habit Tracker</span>
                 </button>
-                <button onclick="switchTab('photos')" id="nav-photos" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                    <i data-lucide="camera" class="w-4 h-4"></i>
-                    <span>Photos</span>
-                </button>
-                <button onclick="switchTab('calendar')" id="nav-calendar" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                    <i data-lucide="calendar" class="w-4 h-4"></i>
-                    <span>90-Day Grid</span>
-                </button>
-                <button onclick="switchTab('analytics')" id="nav-analytics" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                    <span>Analytics</span>
-                </button>
-                <button onclick="switchTab('settings')" id="nav-settings" class="tab-btn px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all text-slate-400 hover:text-white hover:bg-white/5">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
-                    <span>Settings</span>
+                <button onclick="switchTab('quit')" id="nav-quit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    <span>Quit Tracker</span>
                 </button>
             </nav>
         </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="max-w-5xl mx-auto px-4 mt-8">
+        <!-- Sidebar Footer / Quick stats snippet -->
+        <div class="p-6 border-t border-slate-100 bg-slate-50/50">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Overall Score</span>
+                    <span id="overall-score" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div id="overall-progress" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-        <!-- ================= DASHBOARD TAB ================= -->
-        <div id="tab-dashboard" class="tab-content space-y-6">
-            
-            <!-- Day & Streak Banner -->
-            <div class="glass rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div class="absolute -right-10 -top-10 w-48 h-48 bg-accent/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div>
-                    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-xs font-medium mb-3">
-                        <i data-lucide="flame" class="w-3.5 h-3.5"></i>
-                        <span id="streak-counter">0 Day Streak</span>
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <!-- Top Header Bar -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+            <div class="flex items-center space-x-4">
+                <h2 id="view-title" class="text-xl font-bold text-slate-900">Habit Tracker</h2>
+                <span id="view-subtitle" class="hidden sm:inline-block text-xs font-medium bg-slate-100 text-slate-500 px-3 py-1 rounded-full">Build consistent daily routines</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal()" id="add-btn" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-medium text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-indigo-100 transition-all flex items-center space-x-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span id="add-btn-text">Add Habit</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Container Body -->
+        <div class="p-6 max-w-7xl mx-auto w-full flex-1">
+            <!-- Habit View Section -->
+            <div id="section-habit" class="space-y-6">
+                <!-- Date Bar & Filter -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-slate-800">Daily Routines</h3>
+                        <p class="text-sm text-slate-500">Check off your tasks for today and build unstoppable streaks.</p>
                     </div>
-                    <h2 class="text-3xl font-extrabold tracking-tight" id="header-day-title">Day 1 of 90</h2>
-                    <p class="text-slate-400 text-sm mt-1">Consistency compounds. Keep your daily momentum going.</p>
+                    <div class="flex items-center space-x-2 bg-white border border-slate-200 p-1 rounded-xl shadow-sm">
+                        <button onclick="changeHabitDay(-1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <span id="current-habit-date" class="text-sm font-semibold text-slate-700 px-3">Today</span>
+                        <button onclick="changeHabitDay(1)" class="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-4 w-full md:w-auto">
-                    <div class="flex-1 md:flex-none text-right">
-                        <div class="text-2xl font-bold text-accent" id="overall-progress-text">0%</div>
-                        <div class="text-xs text-slate-400">Today's Completion</div>
-                    </div>
-                    <button onclick="completeAllToday()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center space-x-2">
-                        <i data-lucide="check-check" class="w-4 h-4"></i>
-                        <span>Complete All</span>
-                    </button>
+                <!-- Habit Cards Grid -->
+                <div id="habit-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic Habit Cards Rendered Here -->
                 </div>
             </div>
 
-            <!-- Day Selector Bar -->
-            <div class="glass rounded-2xl p-4 flex items-center justify-between gap-4">
-                <button onclick="changeDay(-1)" class="p-2.5 bg-white/5 hover:bg-white/15 rounded-xl border border-cardBorder text-slate-200 transition-all flex items-center space-x-2 text-xs font-semibold cursor-pointer">
-                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    <span>Prev Day</span>
+            <!-- Quit View Section -->
+            <div id="section-quit" class="space-y-6 hidden">
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-800">Bad Habits to Break</h3>
+                    <p class="text-sm text-slate-500">Track your clean streaks, money saved, and reclaim your time.</p>
+                </div>
+
+                <!-- Quit Cards Grid -->
+                <div id="quit-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic Quit Cards Rendered Here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="item-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100 transform transition-all scale-95 opacity-0" id="modal-content">
+            <div class="flex items-center justify-between mb-5">
+                <h3 id="modal-title" class="text-lg font-bold text-slate-900">Add New Habit</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
-                
-                <div class="flex items-center space-x-3">
-                    <label for="day-jump-select" class="text-xs text-slate-400 font-medium">Jump to:</label>
-                    <select id="day-jump-select" onchange="jumpToSelectedDay(this.value)" class="bg-darkBg border border-cardBorder text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-accent cursor-pointer">
-                        <!-- Populated dynamically -->
+            </div>
+            
+            <form id="item-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="modal-type" value="habit">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5" id="label-name">Habit Name</label>
+                    <input type="text" id="input-name" required placeholder="e.g. Skincare, Gym, Meditation" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium text-sm">
+                </div>
+
+                <div id="habit-extra-field">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Category / Icon</label>
+                    <select id="input-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium text-sm">
+                        <option value="sparkles">✨ Self Care / Skincare</option>
+                        <option value="dumbbell">💪 Fitness & Health</option>
+                        <option value="book-open">📚 Learning & Reading</option>
+                        <option value="briefcase">💻 Productivity & Work</option>
+                        <option value="heart">❤️ Wellness & Mind</option>
                     </select>
                 </div>
 
-                <button onclick="changeDay(1)" class="p-2.5 bg-white/5 hover:bg-white/15 rounded-xl border border-cardBorder text-slate-200 transition-all flex items-center space-x-2 text-xs font-semibold cursor-pointer">
-                    <span>Next Day</span>
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                </button>
-            </div>
-
-            <!-- Main Habit Checklist Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="habits-container">
-                <!-- Habit cards generated dynamically via JS -->
-            </div>
-
-            <!-- Daily Bible Verse Card -->
-            <div class="glass rounded-2xl p-6 border-l-4 border-l-accent relative overflow-hidden">
-                <div class="flex items-start space-x-4">
-                    <div class="p-3 bg-accent/20 rounded-xl text-accent mt-1">
-                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                <div id="quit-extra-field" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Money Saved per Day ($)</label>
+                        <input type="number" id="input-cost" min="0" step="0.5" value="5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium text-sm">
                     </div>
-                    <div class="space-y-2 flex-1">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold tracking-wider text-accent uppercase">Daily Scripture Focus</span>
-                            <div class="flex items-center space-x-3">
-                                <span id="verse-ref" class="text-xs text-slate-300 font-medium">Philippians 4:13</span>
-                                <button onclick="randomizeVerse()" class="p-1.5 bg-white/5 hover:bg-white/15 border border-cardBorder rounded-lg text-slate-200 transition-all flex items-center space-x-1 text-xs cursor-pointer" title="Randomize Verse">
-                                    <i data-lucide="shuffle" class="w-3.5 h-3.5 text-accent"></i>
-                                    <span class="hidden sm:inline">Randomize</span>
-                                </button>
-                            </div>
-                        </div>
-                        <p id="verse-text" class="text-slate-200 text-sm italic leading-relaxed">"I can do all things through Christ who strengthens me."</p>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Last Relapse Date</label>
+                        <input type="date" id="input-relapse-date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 transition-all font-medium text-sm">
                     </div>
                 </div>
-            </div>
 
-            <!-- Daily Notes Card -->
-            <div class="glass rounded-2xl p-6 space-y-3">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <i data-lucide="file-text" class="w-4 h-4 text-accent"></i>
-                        <h3 class="text-sm font-bold text-slate-200">Daily Journal & Reflections</h3>
-                    </div>
-                    <span class="text-xs text-slate-500">Auto-saves as you type</span>
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-100 transition-colors">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl font-medium text-sm bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-100 transition-all">Save Item</button>
                 </div>
-                <textarea id="daily-notes" oninput="saveDailyNotes(this.value)" placeholder="How did you feel today? Any wins on skincare, neck posture, or energy levels?" class="w-full h-28 bg-darkBg/60 border border-cardBorder rounded-xl p-4 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-accent resize-none"></textarea>
-            </div>
-
+            </form>
         </div>
+    </div>
 
-        <!-- ================= PHOTOS TAB ================= -->
-        <div id="tab-photos" class="tab-content space-y-6 hidden">
-            <div class="glass rounded-2xl p-6 space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold">Daily Progress Photos</h3>
-                    <p class="text-xs text-slate-400 mt-1">Snap or upload a photo every day to visually capture your glow-up evolution. Saved securely in your browser storage.</p>
-                </div>
+    <!-- Custom Message Box Modal -->
+    <div id="msg-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-100 text-center space-y-4">
+            <div id="msg-icon-container" class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center">
+                <i data-lucide="alert-circle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h4 id="msg-title" class="text-base font-bold text-slate-900 mb-1">Notice</h4>
+                <p id="msg-text" class="text-sm text-slate-500">Message content goes here.</p>
+            </div>
+            <button onclick="closeMsgModal()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm rounded-xl transition-colors">Got it</button>
+        </div>
+    </div>
 
-                <!-- Photo Upload Box for Active Day -->
-                <div class="glass rounded-2xl p-6 border border-accent/30 bg-accent/5 flex flex-col md:flex-row items-center gap-6">
-                    <div class="w-full md:w-1/3 aspect-[3/4] bg-darkBg border border-cardBorder rounded-xl overflow-hidden flex items-center justify-center relative group">
-                        <img id="active-day-photo-preview" src="" alt="No photo for today" class="w-full h-full object-cover hidden">
-                        <div id="active-day-photo-placeholder" class="text-center p-4 text-slate-500">
-                            <i data-lucide="camera" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
-                            <span class="text-xs font-medium">No photo logged for Day <span id="photo-current-day-label">1</span></span>
+    <script>
+        // State Management
+        let currentTab = 'habit';
+        let selectedDateOffset = 0; // 0 means today, -1 yesterday, etc.
+
+        // Default mock data if localStorage is empty
+        let habits = JSON.parse(localStorage.getItem('habitflow_habits')) || [
+            { id: '1', name: 'Skincare Routine', category: 'sparkles', completedDates: {} },
+            { id: '2', name: 'Morning Gym Session', category: 'dumbbell', completedDates: {} },
+            { id: '3', name: 'Read 20 Pages', category: 'book-open', completedDates: {} }
+        ];
+
+        let quits = JSON.parse(localStorage.getItem('habitflow_quits')) || [
+            { id: '101', name: 'Sodas & Sugary Drinks', costPerDay: 4.50, startDate: new Date(Date.now() - 5 * 86400000).toISOString().split('T')[0] },
+            { id: '102', name: 'Late Night Scrolling', costPerDay: 0, startDate: new Date(Date.now() - 12 * 86400000).toISOString().split('T')[0] }
+        ];
+
+        // Initialize Lucide icons on load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateDateLabel();
+            renderApp();
+            lucide.createIcons();
+        });
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('habitflow_habits', JSON.stringify(habits));
+            localStorage.setItem('habitflow_quits', JSON.stringify(quits));
+            updateOverallProgress();
+        }
+
+        // Switch tabs between Habit and Quit
+        function switchTab(tab) {
+            currentTab = tab;
+            const habitNav = document.getElementById('nav-habit');
+            const quitNav = document.getElementById('nav-quit');
+            const habitSection = document.getElementById('section-habit');
+            const quitSection = document.getElementById('section-quit');
+            const viewTitle = document.getElementById('view-title');
+            const viewSubtitle = document.getElementById('view-subtitle');
+            const addBtnText = document.getElementById('add-btn-text');
+
+            if (tab === 'habit') {
+                habitNav.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all bg-indigo-50 text-indigo-700 shadow-sm";
+                quitNav.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all";
+                habitSection.classList.remove('hidden');
+                quitSection.classList.add('hidden');
+                viewTitle.innerText = "Habit Tracker";
+                viewSubtitle.innerText = "Build consistent daily routines";
+                addBtnText.innerText = "Add Habit";
+            } else {
+                quitNav.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm transition-all bg-indigo-50 text-indigo-700 shadow-sm";
+                habitNav.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all";
+                quitSection.classList.remove('hidden');
+                habitSection.classList.add('hidden');
+                viewTitle.innerText = "Quit Tracker";
+                viewSubtitle.innerText = "Break bad habits and stay clean";
+                addBtnText.innerText = "Add Quit Habit";
+            }
+            renderApp();
+        }
+
+        // Date helper for habits
+        function getTargetDateString(offset = selectedDateOffset) {
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            return d.toISOString().split('T')[0];
+        }
+
+        function updateDateLabel() {
+            const label = document.getElementById('current-habit-date');
+            if (selectedDateOffset === 0) {
+                label.innerText = "Today";
+            } else if (selectedDateOffset === -1) {
+                label.innerText = "Yesterday";
+            } else if (selectedDateOffset === 1) {
+                label.innerText = "Tomorrow";
+            } else {
+                const d = new Date();
+                d.setDate(d.getDate() + selectedDateOffset);
+                label.innerText = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+        }
+
+        function changeHabitDay(direction) {
+            selectedDateOffset += direction;
+            updateDateLabel();
+            renderHabits();
+        }
+
+        // Render main app view
+        function renderApp() {
+            renderHabits();
+            renderQuits();
+            updateOverallProgress();
+            lucide.createIcons();
+        }
+
+        // Render Habits view matching wireframe & high quality polish
+        function renderHabits() {
+            const grid = document.getElementById('habit-cards-grid');
+            grid.innerHTML = '';
+            const dateStr = getTargetDateString();
+
+            if (habits.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-dashed border-slate-200">
+                        <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="calendar-plus" class="w-6 h-6"></i>
                         </div>
+                        <h4 class="font-bold text-slate-700 text-base">No habits added yet</h4>
+                        <p class="text-sm text-slate-400 mt-1">Click "+ Add Habit" to start building your daily routine.</p>
                     </div>
+                `;
+                return;
+            }
 
-                    <div class="flex-1 space-y-4 w-full">
-                        <div>
-                            <span class="px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-xs font-semibold">Day <span id="photo-badge-day">1</span> Photo Log</span>
-                            <h4 class="text-base font-bold text-slate-200 mt-2">Capture Your Transformation</h4>
-                            <p class="text-xs text-slate-400 mt-1">Upload a clear photo for today. Consistent lighting and angles will make your 90-day comparison stand out.</p>
-                        </div>
+            habits.forEach(habit => {
+                const isCompleted = habit.completedDates && habit.completedDates[dateStr] === true;
+                
+                // Calculate streak
+                let streak = 0;
+                let checkDate = new Date();
+                while (true) {
+                    const dStr = checkDate.toISOString().split('T')[0];
+                    if (habit.completedDates && habit.completedDates[dStr]) {
+                        streak++;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                    } else {
+                        if (dStr === new Date().toISOString().split('T')[0]) {
+                            checkDate.setDate(checkDate.getDate() - 1);
+                            const yStr = checkDate.toISOString().split('T')[0];
+                            if (habit.completedDates && habit.completedDates[yStr]) {
+                                streak++;
+                                checkDate.setDate(checkDate.getDate() - 1);
+                                continue;
+                            }
+                        }
+                        break;
+                    }
+                }
 
-                        <div class="flex flex-wrap gap-3">
-                            <label class="px-4 py-2.5 bg-accent hover:bg-accentHover text-white text-xs font-bold rounded-xl shadow-lg shadow-accent/25 transition-all flex items-center space-x-2 cursor-pointer">
-                                <i data-lucide="upload" class="w-4 h-4"></i>
-                                <span>Upload Photo</span>
-                                <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" class="hidden">
-                            </label>
-                            <button id="delete-photo-btn" onclick="deleteActivePhoto()" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-semibold rounded-xl transition-all flex items-center space-x-2 hidden cursor-pointer">
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-2xl p-5 border transition-all duration-300 shadow-sm hover:shadow-md flex flex-col justify-between ${isCompleted ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200/80'}`;
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl ${isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-50 text-indigo-600'} flex items-center justify-center transition-colors">
+                                    <i data-lucide="${habit.category || 'check'}" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-base">${escapeHtml(habit.name)}</h4>
+                                    <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full inline-flex items-center space-x-1 mt-0.5">
+                                        <i data-lucide="flame" class="w-3 h-3"></i>
+                                        <span>${streak} day streak</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <button onclick="deleteHabit('${habit.id}')" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition-colors">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                <span>Remove Photo</span>
                             </button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Gallery Grid of Logged Photos -->
-                <div class="space-y-4 pt-4 border-t border-cardBorder">
-                    <h4 class="text-sm font-bold text-slate-200">Your Journey Gallery (All Logged Days)</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3" id="photo-gallery-grid">
-                        <!-- Populated dynamically -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= 90-DAY GRID TAB ================= -->
-        <div id="tab-calendar" class="tab-content space-y-6 hidden">
-            <div class="glass rounded-2xl p-6 space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold">90-Day Master Matrix</h3>
-                    <p class="text-xs text-slate-400 mt-1">Visual overview of your entire 3-month consistency journey. Click any day to view or edit.</p>
-                </div>
-                <div class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-15 gap-2.5" id="master-grid">
-                    <!-- Grid cells populated dynamically -->
-                </div>
-                <div class="flex items-center justify-center gap-6 pt-4 border-t border-cardBorder text-xs text-slate-400">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3.5 h-3.5 bg-emerald-500/20 border border-emerald-500/40 rounded"></div>
-                        <span>Completed (100%)</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3.5 h-3.5 bg-accent/20 border border-accent/40 rounded"></div>
-                        <span>Partial</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-3.5 h-3.5 bg-darkBg border border-cardBorder rounded"></div>
-                        <span>Not Started</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= ANALYTICS TAB ================= -->
-        <div id="tab-analytics" class="tab-content space-y-6 hidden">
-            <div class="glass rounded-2xl p-6 space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold">Habit Performance Analytics</h3>
-                    <p class="text-xs text-slate-400 mt-1">See your completion rates across all 6 core pillars over 90 days.</p>
-                </div>
-                <div class="space-y-4" id="analytics-bars">
-                    <!-- Populated dynamically -->
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= SETTINGS TAB ================= -->
-        <div id="tab-settings" class="tab-content space-y-6 hidden">
-            <div class="glass rounded-2xl p-6 space-y-6">
-                <div>
-                    <h3 class="text-lg font-bold">Data & Account Management</h3>
-                    <p class="text-xs text-slate-400 mt-1">Export your progress backup or reset your tracker data.</p>
-                </div>
-                <div class="flex flex-wrap gap-4 pt-2">
-                    <button onclick="exportData()" class="px-4 py-2.5 bg-white/5 hover:bg-white/15 border border-cardBorder rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
-                        <i data-lucide="download" class="w-4 h-4 text-accent"></i>
-                        <span>Export Backup (JSON)</span>
-                    </button>
-                    <label class="px-4 py-2.5 bg-white/5 hover:bg-white/15 border border-cardBorder rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
-                        <i data-lucide="upload" class="w-4 h-4 text-emerald-400"></i>
-                        <span>Import Backup</span>
-                        <input type="file" accept=".json" onchange="importData(event)" class="hidden">
-                    </label>
-                    <button onclick="resetAllData()" class="px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        <span>Reset All Data</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- App Logic Script -->
-    <script>
-        // Core Definitions
-        const TOTAL_DAYS = 90;
-        const habitsList = [
-            { id: 'water', name: 'Hydration (Water)', desc: 'Aim for 2.5L to 3L daily for skin turgor & metabolism', icon: 'droplet', color: 'text-cyan-400' },
-            { id: 'skincare', name: 'Targeted Skincare Routine', desc: 'Gentle cleanser, moisturizer & daily broad-spectrum SPF', icon: 'sparkles', color: 'text-amber-400' },
-            { id: 'cardio', name: 'Cardiovascular Exercise', desc: '30+ mins brisk walk, run, or cycling for blood flow', icon: 'heart-pulse', color: 'text-rose-400' },
-            { id: 'diet', name: 'Healthy Whole-Food Diet', desc: 'Minimally processed clean foods, lean proteins & healthy fats', icon: 'apple', color: 'text-emerald-400' },
-            { id: 'neck', name: 'Chin Tucks & Neck Curls', desc: 'Deep cervical flexor training to eliminate tech neck', icon: 'activity', color: 'text-indigo-400' },
-            { id: 'eyebrows', name: 'Castor Oil for Eyebrows', desc: 'Ricinoleic acid application for glossy, conditioned brows', icon: 'eye', color: 'text-purple-400' }
-        ];
-
-        // 90 Daily Bible Verses Rotation & Pool
-        const bibleVerses = [
-            { ref: "Philippians 4:13", text: "I can do all things through Christ who strengthens me." },
-            { ref: "Psalm 139:14", text: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well." },
-            { ref: "1 Corinthians 6:19-20", text: "Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God?" },
-            { ref: "Romans 12:2", text: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind." },
-            { ref: "Isaiah 40:31", text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary." },
-            { ref: "Proverbs 3:7-8", text: "Do not be wise in your own eyes; fear the Lord and shun evil. This will bring health to your body and nourishment to your bones." },
-            { ref: "3 John 1:2", text: "Dear friend, I pray that you may enjoy good health and that all may go well with you, even as your soul is getting along well." },
-            { ref: "Psalm 118:24", text: "The Lord has done it this very day; let us rejoice today and be glad in it." },
-            { ref: "Colossians 3:23", text: "Whatever you do, work at it with all your heart, as working for the Lord, not for human masters." },
-            { ref: "Psalm 46:5", text: "God is within her, she will not fall; God will help her at break of day." },
-            { ref: "Proverbs 4:20-22", text: "My son, pay attention to what I say; turn your ear to my words. Do not let them out of your sight, keep them within your heart; for they are life to those who find them and health to one's whole body." },
-            { ref: "Joshua 1:9", text: "Have I not commanded you? Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go." },
-            { ref: "Psalm 23:1-3", text: "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul." },
-            { ref: "Matthew 6:33", text: "But seek first his kingdom and his righteousness, and all these things will be given to you as well." },
-            { ref: "Romans 8:28", text: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose." }
-        ];
-
-        // State Management
-        let currentDay = parseInt(localStorage.getItem('glowup_current_day')) || 1;
-        let userData = JSON.parse(localStorage.getItem('glowup_user_data')) || {};
-        let activeVerseIndex = null;
-
-        // Initialize App
-        function initApp() {
-            populateDaySelector();
-            renderDashboard();
-            renderCalendarGrid();
-            renderAnalytics();
-            renderPhotosTab();
-            lucide.createIcons();
-        }
-
-        // Tab Navigation
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-accent', 'text-white', 'shadow-lg', 'shadow-accent/20');
-                btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-white/5');
-            });
-
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-white/5');
-            activeBtn.classList.add('bg-accent', 'text-white', 'shadow-lg', 'shadow-accent/20');
-
-            if(tabId === 'calendar') renderCalendarGrid();
-            if(tabId === 'analytics') renderAnalytics();
-            if(tabId === 'photos') renderPhotosTab();
-            lucide.createIcons();
-        }
-
-        // Populate Day Selector Dropdown
-        function populateDaySelector() {
-            const select = document.getElementById('day-jump-select');
-            select.innerHTML = '';
-            for (let i = 1; i <= TOTAL_DAYS; i++) {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = `Day ${i}`;
-                if (i === currentDay) opt.selected = true;
-                select.appendChild(opt);
-            }
-        }
-
-        function jumpToSelectedDay(dayNum) {
-            currentDay = parseInt(dayNum);
-            localStorage.setItem('glowup_current_day', currentDay);
-            activeVerseIndex = null; // reset verse override on day change
-            renderDashboard();
-            renderPhotosTab();
-        }
-
-        function changeDay(direction) {
-            const newDay = currentDay + direction;
-            if (newDay >= 1 && newDay <= TOTAL_DAYS) {
-                currentDay = newDay;
-                localStorage.setItem('glowup_current_day', currentDay);
-                document.getElementById('day-jump-select').value = currentDay;
-                activeVerseIndex = null;
-                renderDashboard();
-                renderPhotosTab();
-            }
-        }
-
-        // Render Dashboard
-        function renderDashboard() {
-            document.getElementById('header-day-title').textContent = `Day ${currentDay} of ${TOTAL_DAYS}`;
-            
-            if (!userData[currentDay]) {
-                userData[currentDay] = { habits: {}, notes: '', photo: null };
-            }
-
-            // Render Habits
-            const container = document.getElementById('habits-container');
-            container.innerHTML = '';
-
-            let completedCount = 0;
-            habitsList.forEach(habit => {
-                const isChecked = userData[currentDay].habits[habit.id] || false;
-                if (isChecked) completedCount++;
-
-                const card = document.createElement('div');
-                card.className = `glass rounded-2xl p-5 border transition-all flex items-start space-x-4 cursor-pointer hover:border-accent/40 ${isChecked ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-cardBorder'}`;
-                card.onclick = (e) => {
-                    if(e.target.tagName !== 'INPUT') toggleHabit(habit.id);
-                };
-
-                card.innerHTML = `
-                    <div class="p-3 rounded-xl bg-darkBg border border-cardBorder ${habit.color} mt-0.5">
-                        <i data-lucide="${habit.icon}" class="w-5 h-5"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-sm font-bold text-slate-200">${habit.name}</h4>
-                            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleHabit('${habit.id}')" class="w-5 h-5 accent-accent rounded cursor-pointer">
-                        </div>
-                        <p class="text-xs text-slate-400 mt-1">${habit.desc}</p>
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs font-medium text-slate-500">Status for ${selectedDateOffset === 0 ? 'Today' : dateStr}</span>
+                        <button onclick="toggleHabitDate('${habit.id}', '${dateStr}')" class="flex items-center space-x-2 px-4 py-2 rounded-xl font-medium text-xs transition-all ${isCompleted ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100 hover:bg-emerald-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+                            <i data-lucide="${isCompleted ? 'check-circle' : 'circle'}" class="w-4 h-4"></i>
+                            <span>${isCompleted ? 'Completed' : 'Mark Done'}</span>
+                        </button>
                     </div>
                 `;
-                container.appendChild(card);
+                grid.appendChild(card);
             });
-
-            // Update Completion Percentage
-            const percent = Math.round((completedCount / habitsList.length) * 100);
-            document.getElementById('overall-progress-text').textContent = `${percent}%`;
-
-            // Daily Notes
-            document.getElementById('daily-notes').value = userData[currentDay].notes || '';
-
-            // Daily Bible Verse
-            if (activeVerseIndex === null) {
-                activeVerseIndex = (currentDay - 1) % bibleVerses.length;
-            }
-            const verse = bibleVerses[activeVerseIndex];
-            document.getElementById('verse-ref').textContent = verse.ref;
-            document.getElementById('verse-text').textContent = `"${verse.text}"`;
-
-            updateStreak();
-            lucide.createIcons();
         }
 
-        // Randomize Bible Verse
-        function randomizeVerse() {
-            let newIndex;
-            do {
-                newIndex = Math.floor(Math.random() * bibleVerses.length);
-            } while (newIndex === activeVerseIndex && bibleVerses.length > 1);
-            
-            activeVerseIndex = newIndex;
-            const verse = bibleVerses[activeVerseIndex];
-            document.getElementById('verse-ref').textContent = verse.ref;
-            document.getElementById('verse-text').textContent = `"${verse.text}"`;
-        }
-
-        // Toggle Habit
-        function toggleHabit(habitId) {
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
-            userData[currentDay].habits[habitId] = !userData[currentDay].habits[habitId];
-            saveData();
-            renderDashboard();
-        }
-
-        // Complete All Today
-        function completeAllToday() {
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
-            habitsList.forEach(h => {
-                userData[currentDay].habits[h.id] = true;
-            });
-            saveData();
-            renderDashboard();
-        }
-
-        // Save Notes
-        function saveDailyNotes(val) {
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
-            userData[currentDay].notes = val;
-            saveData();
-        }
-
-        // Photo Upload Handling
-        function handlePhotoUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
-                userData[currentDay].photo = e.target.result;
-                saveData();
-                renderPhotosTab();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function deleteActivePhoto() {
-            if (userData[currentDay]) {
-                userData[currentDay].photo = null;
-                saveData();
-                renderPhotosTab();
-            }
-        }
-
-        function renderPhotosTab() {
-            document.getElementById('photo-current-day-label').textContent = currentDay;
-            document.getElementById('photo-badge-day').textContent = currentDay;
-
-            if (!userData[currentDay]) userData[currentDay] = { habits: {}, notes: '', photo: null };
-
-            const previewImg = document.getElementById('active-day-photo-preview');
-            const placeholder = document.getElementById('active-day-photo-placeholder');
-            const deleteBtn = document.getElementById('delete-photo-btn');
-
-            if (userData[currentDay].photo) {
-                previewImg.src = userData[currentDay].photo;
-                previewImg.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                deleteBtn.classList.remove('hidden');
-            } else {
-                previewImg.src = '';
-                previewImg.classList.add('hidden');
-                placeholder.classList.remove('hidden');
-                deleteBtn.classList.add('hidden');
-            }
-
-            // Render Gallery Grid
-            const galleryGrid = document.getElementById('photo-gallery-grid');
-            galleryGrid.innerHTML = '';
-
-            for (let i = 1; i <= TOTAL_DAYS; i++) {
-                const hasPhoto = userData[i] && userData[i].photo;
-                const cell = document.createElement('div');
-                cell.className = `aspect-[3/4] rounded-xl border flex flex-col items-center justify-center overflow-hidden relative cursor-pointer transition-all hover:scale-105 ${hasPhoto ? 'border-accent/50 bg-darkBg' : 'border-cardBorder bg-darkBg/40 text-slate-600'}`;
-                
-                if (hasPhoto) {
-                    cell.innerHTML = `
-                        <img src="${userData[i].photo}" alt="Day ${i}" class="w-full h-full object-cover">
-                        <div class="absolute bottom-1 right-1 px-1.5 py-0.5 bg-black/70 rounded text-[10px] font-bold text-white">Day ${i}</div>
-                    `;
-                } else {
-                    cell.innerHTML = `
-                        <i data-lucide="image" class="w-5 h-5 opacity-30 mb-1"></i>
-                        <span class="text-[10px] font-semibold">Day ${i}</span>
-                    `;
-                }
-
-                cell.onclick = () => {
-                    currentDay = i;
-                    document.getElementById('day-jump-select').value = i;
-                    localStorage.setItem('glowup_current_day', currentDay);
-                    renderPhotosTab();
-                };
-
-                galleryGrid.appendChild(cell);
-            }
-            lucide.createIcons();
-        }
-
-        // Streak Calculation
-        function updateStreak() {
-            let streak = 0;
-            let checkDay = currentDay;
-            
-            while(checkDay >= 1) {
-                if (userData[checkDay]) {
-                    const completed = habitsList.filter(h => userData[checkDay].habits[h.id]).length;
-                    if (completed === habitsList.length) {
-                        streak++;
-                    } else if (checkDay !== currentDay) {
-                        break;
-                    }
-                } else if (checkDay !== currentDay) {
-                    break;
-                }
-                checkDay--;
-            }
-            document.getElementById('streak-counter').textContent = `${streak} Day Streak`;
-        }
-
-        // Save to LocalStorage
-        function saveData() {
-            localStorage.setItem('glowup_user_data', JSON.stringify(userData));
-        }
-
-        // Render 90-Day Master Grid
-        function renderCalendarGrid() {
-            const grid = document.getElementById('master-grid');
+        // Render Quits view
+        function renderQuits() {
+            const grid = document.getElementById('quit-cards-grid');
             grid.innerHTML = '';
 
-            for (let i = 1; i <= TOTAL_DAYS; i++) {
-                let statusClass = 'bg-darkBg border-cardBorder text-slate-500';
-                if (userData[i]) {
-                    const completed = habitsList.filter(h => userData[i].habits[h.id]).length;
-                    if (completed === habitsList.length) {
-                        statusClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300';
-                    } else if (completed > 0) {
-                        statusClass = 'bg-accent/20 border-accent/40 text-accent';
-                    }
-                }
-
-                const cell = document.createElement('button');
-                cell.className = `h-10 rounded-xl border flex flex-col items-center justify-center text-xs font-bold transition-all hover:scale-105 cursor-pointer ${statusClass} ${i === currentDay ? 'ring-2 ring-white' : ''}`;
-                cell.innerHTML = `<span>${i}</span>`;
-                cell.onclick = () => {
-                    currentDay = i;
-                    document.getElementById('day-jump-select').value = i;
-                    localStorage.setItem('glowup_current_day', currentDay);
-                    switchTab('dashboard');
-                };
-                grid.appendChild(cell);
-            }
-        }
-
-        // Render Analytics
-        function renderAnalytics() {
-            const container = document.getElementById('analytics-bars');
-            container.innerHTML = '';
-
-            habitsList.forEach(habit => {
-                let completedDays = 0;
-                for (let i = 1; i <= TOTAL_DAYS; i++) {
-                    if (userData[i] && userData[i].habits[habit.id]) completedDays++;
-                }
-                const pct = Math.round((completedDays / TOTAL_DAYS) * 100);
-
-                const item = document.createElement('div');
-                item.className = 'space-y-2';
-                item.innerHTML = `
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="font-bold text-slate-200 flex items-center space-x-2">
-                            <i data-lucide="${habit.icon}" class="w-4 h-4 ${habit.color}"></i>
-                            <span>${habit.name}</span>
-                        </span>
-                        <span class="text-slate-400">${completedDays}/${TOTAL_DAYS} days (${pct}%)</span>
-                    </div>
-                    <div class="w-full bg-darkBg h-2.5 rounded-full border border-cardBorder overflow-hidden">
-                        <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+            if (quits.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-dashed border-slate-200">
+                        <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <h4 class="font-bold text-slate-700 text-base">No bad habits logged</h4>
+                        <p class="text-sm text-slate-400 mt-1">Click "+ Add Quit Habit" to track your clean journey.</p>
                     </div>
                 `;
-                container.appendChild(item);
+                return;
+            }
+
+            const now = new Date();
+            quits.forEach(quit => {
+                const startDate = new Date(quit.startDate);
+                const diffTime = Math.abs(now - startDate);
+                const cleanDays = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+                const moneySaved = (cleanDays * (quit.costPerDay || 0)).toFixed(2);
+
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-base">${escapeHtml(quit.name)}</h4>
+                                    <span class="text-xs font-semibold text-slate-400">Clean since ${quit.startDate}</span>
+                                </div>
+                            </div>
+                            <button onclick="deleteQuit('${quit.id}')" class="text-slate-300 hover:text-rose-500 p-1.5 rounded-lg hover:bg-rose-50 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-xs font-medium text-slate-400 block mb-1">Clean Streak</span>
+                                <span class="text-lg font-extrabold text-indigo-600">${cleanDays} <span class="text-xs font-medium text-slate-500">days</span></span>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-xs font-medium text-slate-400 block mb-1">Money Saved</span>
+                                <span class="text-lg font-extrabold text-emerald-600">$${moneySaved}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <span class="text-xs text-slate-400">Stay strong!</span>
+                        <button onclick="resetQuit('${quit.id}')" class="text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors flex items-center space-x-1">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                            <span>Relapsed Today</span>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
             });
-            lucide.createIcons();
         }
 
-        // Export Data
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userData));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "glowup_tracker_backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // Import Data
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    userData = JSON.parse(e.target.result);
-                    saveData();
-                    renderDashboard();
-                    alert("Backup imported successfully!");
-                } catch (err) {
-                    alert("Invalid backup file.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // Reset Data
-        function resetAllData() {
-            if (confirm("Are you sure you want to reset all progress data? This cannot be undone.")) {
-                localStorage.removeItem('glowup_user_data');
-                localStorage.removeItem('glowup_current_day');
-                userData = {};
-                currentDay = 1;
-                initApp();
-                alert("Tracker has been reset.");
+        // Toggle habit completion for date
+        function toggleHabitDate(id, dateStr) {
+            const habit = habits.find(h => h.id === id);
+            if (habit) {
+                if (!habit.completedDates) habit.completedDates = {};
+                habit.completedDates[dateStr] = !habit.completedDates[dateStr];
+                saveData();
+                renderApp();
             }
         }
 
-        // Run on load
-        window.onload = initApp;
+        // Reset quit streak (relapse)
+        function resetQuit(id) {
+            const quit = quits.find(q => q.id === id);
+            if (quit) {
+                quit.startDate = new Date().toISOString().split('T')[0];
+                saveData();
+                renderApp();
+                showMsg("Streak Reset", `Reset clean date for "${quit.name}" to today. Keep going forward!`, "refresh-cw");
+            }
+        }
+
+        // Delete items
+        function deleteHabit(id) {
+            habits = habits.filter(h => h.id !== id);
+            saveData();
+            renderApp();
+        }
+
+        function deleteQuit(id) {
+            quits = quits.filter(q => q.id !== id);
+            saveData();
+            renderApp();
+        }
+
+        // Overall progress calculation
+        function updateOverallProgress() {
+            const dateStr = getTargetDateString();
+            const totalHabits = habits.length;
+            if (totalHabits === 0) {
+                document.getElementById('overall-score').innerText = "0%";
+                document.getElementById('overall-progress').style.width = "0%";
+                return;
+            }
+            let completedCount = 0;
+            habits.forEach(h => {
+                if (h.completedDates && h.completedDates[dateStr]) completedCount++;
+            });
+            const pct = Math.round((completedCount / totalHabits) * 100);
+            document.getElementById('overall-score').innerText = pct + "%";
+            document.getElementById('overall-progress').style.width = pct + "%";
+        }
+
+        // Modal Management
+        function openModal() {
+            const modal = document.getElementById('item-modal');
+            const content = document.getElementById('modal-content');
+            const typeInput = document.getElementById('modal-type');
+            const modalTitle = document.getElementById('modal-title');
+            const habitField = document.getElementById('habit-extra-field');
+            const quitField = document.getElementById('quit-extra-field');
+            const labelName = document.getElementById('label-name');
+
+            typeInput.value = currentTab;
+            if (currentTab === 'habit') {
+                modalTitle.innerText = "Add New Habit";
+                labelName.innerText = "Habit Name";
+                habitField.classList.remove('hidden');
+                quitField.classList.add('hidden');
+            } else {
+                modalTitle.innerText = "Add Habit to Quit";
+                labelName.innerText = "Bad Habit Name";
+                habitField.classList.add('hidden');
+                quitField.classList.remove('hidden');
+                document.getElementById('input-relapse-date').value = new Date().toISOString().split('T')[0];
+            }
+
+            document.getElementById('input-name').value = '';
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('item-modal');
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Form Submit Handler
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const type = document.getElementById('modal-type').value;
+            const name = document.getElementById('input-name').value.trim();
+            if (!name) return;
+
+            if (type === 'habit') {
+                const category = document.getElementById('input-category').value;
+                habits.push({
+                    id: Date.now().toString(),
+                    name,
+                    category,
+                    completedDates: {}
+                });
+            } else {
+                const costPerDay = parseFloat(document.getElementById('input-cost').value) || 0;
+                const startDate = document.getElementById('input-relapse-date').value || new Date().toISOString().split('T')[0];
+                quits.push({
+                    id: Date.now().toString(),
+                    name,
+                    costPerDay,
+                    startDate
+                });
+            }
+
+            saveData();
+            closeModal();
+            renderApp();
+        }
+
+        // Custom Message Box Modal
+        function showMsg(title, text, iconName = 'alert-circle') {
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-text').innerText = text;
+            const modal = document.getElementById('msg-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeMsgModal() {
+            document.getElementById('msg-modal').classList.add('hidden');
+        }
+
+        // XSS safety helper
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
     </script>
 </body>
 </html>
